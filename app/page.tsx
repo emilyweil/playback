@@ -123,17 +123,16 @@ function Hero() {
       </div>
 
       <div className="relative bg-gradient-to-t from-ink via-ink/80 to-ink/10 px-8 py-20 text-center">
-        <p className="font-mono text-xs uppercase tracking-wide2 text-signal">Now playing: your listening life</p>
-        <h1 className="mx-auto mt-4 max-w-2xl font-display text-4xl font-semibold leading-tight text-cream sm:text-5xl">
-          Track every episode. Rate every show.
+        <h1 className="mx-auto max-w-xl font-display text-3xl font-semibold leading-tight text-cream sm:text-4xl">
+          Track podcasts you&rsquo;ve listened to.
+          <br />
+          Save those you want to hear.
+          <br />
+          Tell your friends what&rsquo;s good.
         </h1>
-        <p className="mx-auto mt-4 max-w-xl text-cream/80">
-          Playback is a place to log what you listen to, rate podcasts and individual episodes,
-          write reviews, and see what the people you follow are hearing.
-        </p>
         <div className="mt-8 flex justify-center gap-3">
           <Link href="/signup" className="rounded bg-amber px-5 py-2.5 font-medium text-ink hover:bg-amber/90">
-            Start logging
+            Get started — it&rsquo;s free!
           </Link>
           <Link
             href="/podcasts"
@@ -142,6 +141,9 @@ function Hero() {
             Browse podcasts
           </Link>
         </div>
+        <p className="mt-6 font-mono text-xs uppercase tracking-wide2 text-signal">
+          The social network for podcast lovers.
+        </p>
       </div>
     </section>
   );
