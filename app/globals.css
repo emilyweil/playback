@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background-color: #14181C;
+  color: #EDE6D6;
+}
+
+* {
+  border-color: #2C343D;
+}
+
+::selection {
+  background-color: #E8A33D;
+  color: #14181C;
+}
+
+a {
+  text-underline-offset: 3px;
+}
+
+:focus-visible {
+  outline: 2px solid #E8A33D;
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Ambient waveform, used behind the homepage hero. Bars breathe at    */
+/* slightly different speeds so it never looks like a looping gif.     */
+/* ------------------------------------------------------------------ */
+@keyframes wave-bob {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+
+.wave-bar {
+  animation-name: wave-bob;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wave-bar {
+    animation: none;
+  }
+}
+
+.hairline {
+  border-top: 1px solid #2C343D;
+}
+
+@layer components {
+  .input {
+    @apply rounded border border-line bg-surface px-3 py-2 text-cream placeholder:text-slate/70 focus:border-amber;
+  }
+  .textarea {
+    @apply rounded border border-line bg-surface px-3 py-2 text-cream placeholder:text-slate/70 focus:border-amber;
+  }
+  .btn-primary {
+    @apply rounded bg-amber px-4 py-2.5 font-medium text-ink hover:bg-amber/90 disabled:opacity-60;
+  }
+  .btn-secondary {
+    @apply rounded border border-line px-4 py-2.5 text-cream hover:border-amber transition-colors;
+  }
+}
