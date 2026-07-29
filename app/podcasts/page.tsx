@@ -12,13 +12,25 @@ export default async function BrowsePodcasts({
 
   let query = supabase
     .from('podcasts')
-    .select('id, slug, title, cover_url, host_names, podcast_stats(average_rating, rating_count)')
+    .select('id, slug, title, cover_url, host_names')
     .order('created_at', { ascending: false })
     .limit(48);
 
   if (q) query = query.ilike('title', `%${q}%`);
 
   const { data: podcasts, error } = await query;
+
+  // podcast_stats is an aggregate view with no foreign key back to podcasts,
+  // so PostgREST can't embed it via nested select syntax — fetch separately
+  // and merge by id instead.
+  const statsById: Record<string, { average_rating: number | null; rating_count: number }> = {};
+  if (podcasts && podcasts.length > 0) {
+    const { data: stats } = await supabase
+      .from('podcast_stats')
+      .select('podcast_id, average_rating, rating_count')
+      .in('podcast_id', podcasts.map((p) => p.id));
+    for (const s of stats ?? []) statsById[s.podcast_id] = s;
+  }
 
   return (
     <div>
@@ -49,15 +61,15 @@ export default async function BrowsePodcasts({
         </p>
       ) : (
         <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {podcasts.map((p: any) => (
+          {podcasts.map((p) => (
             <PodcastCard
               key={p.id}
               slug={p.slug}
               title={p.title}
               coverUrl={p.cover_url}
               hostNames={p.host_names}
-              averageRating={p.podcast_stats?.[0]?.average_rating}
-              ratingCount={p.podcast_stats?.[0]?.rating_count}
+              averageRating={statsById[p.id]?.average_rating}
+              ratingCount={statsById[p.id]?.rating_count}
             />
           ))}
         </div>

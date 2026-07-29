@@ -14,13 +14,13 @@ export default async function PodcastPage({ params }: { params: { slug: string }
 
   const { data: podcast, error: podcastError } = await supabase
     .from('podcasts')
-    .select('*, podcast_stats(average_rating, rating_count, log_count)')
+    .select('*')
     .eq('slug', params.slug)
     .single();
 
   // PGRST116 = "no rows found", the only case that's a genuine 404. Any
-  // other error (e.g. a permissions issue on a joined view) should be
-  // visible, not silently swallowed into a misleading not-found page.
+  // other error should be visible, not silently swallowed into a
+  // misleading not-found page.
   if (podcastError && podcastError.code !== 'PGRST116') {
     return (
       <p className="rounded border border-rust/40 bg-rust/5 p-4 text-sm text-rust">
@@ -31,12 +31,31 @@ export default async function PodcastPage({ params }: { params: { slug: string }
 
   if (!podcast) notFound();
 
+  // podcast_stats/episode_stats are aggregate views with no foreign key
+  // back to their base tables, so PostgREST can't embed them via nested
+  // select syntax ("Could not find a relationship..." error) — fetch them
+  // separately and merge by id instead.
+  const { data: stats } = await supabase
+    .from('podcast_stats')
+    .select('average_rating, rating_count, log_count')
+    .eq('podcast_id', podcast.id)
+    .maybeSingle();
+
   const { data: episodes } = await supabase
     .from('episodes')
-    .select('id, title, episode_number, season_number, published_at, episode_stats(average_rating, rating_count)')
+    .select('id, title, episode_number, season_number, published_at')
     .eq('podcast_id', podcast.id)
     .order('published_at', { ascending: false, nullsFirst: false })
     .limit(100);
+
+  const episodeStatsById: Record<string, { average_rating: number | null; rating_count: number }> = {};
+  if (episodes && episodes.length > 0) {
+    const { data: epStats } = await supabase
+      .from('episode_stats')
+      .select('episode_id, average_rating, rating_count')
+      .in('episode_id', episodes.map((e) => e.id));
+    for (const s of epStats ?? []) episodeStatsById[s.episode_id] = s;
+  }
 
   const { data: reviews } = await supabase
     .from('reviews')
@@ -57,8 +76,6 @@ export default async function PodcastPage({ params }: { params: { slug: string }
       .maybeSingle();
     myStatus = data?.status ?? null;
   }
-
-  const stats = (podcast as any).podcast_stats?.[0];
 
   return (
     <div>
@@ -128,9 +145,7 @@ export default async function PodcastPage({ params }: { params: { slug: string }
                   <span className="ml-2 text-cream hover:text-amber">{ep.title}</span>
                 </Link>
                 <RatingWaveform
-                  rating={
-                    ep.episode_stats?.[0]?.average_rating ? Math.round(ep.episode_stats[0].average_rating) : null
-                  }
+                  rating={episodeStatsById[ep.id]?.average_rating ? Math.round(episodeStatsById[ep.id].average_rating!) : null}
                   size="sm"
                 />
               </li>

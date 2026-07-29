@@ -13,7 +13,7 @@ export default async function EpisodePage({ params }: { params: { id: string } }
 
   const { data: episodeData, error: episodeError } = await supabase
     .from('episodes')
-    .select('*, podcasts(title, slug, cover_url), episode_stats(average_rating, rating_count, log_count)')
+    .select('*, podcasts(title, slug, cover_url)')
     .eq('id', params.id)
     .single();
 
@@ -29,6 +29,15 @@ export default async function EpisodePage({ params }: { params: { id: string } }
 
   if (!episode) notFound();
 
+  // episode_stats is an aggregate view with no foreign key back to
+  // episodes, so PostgREST can't embed it via nested select syntax — fetch
+  // it separately instead.
+  const { data: stats } = await supabase
+    .from('episode_stats')
+    .select('average_rating, rating_count, log_count')
+    .eq('episode_id', episode.id)
+    .maybeSingle();
+
   const { data: reviews } = await supabase
     .from('reviews')
     .select(
@@ -38,7 +47,6 @@ export default async function EpisodePage({ params }: { params: { id: string } }
     .order('created_at', { ascending: false })
     .limit(20);
 
-  const stats = (episode as any).episode_stats?.[0];
   const podcast = (episode as any).podcasts;
 
   return (
