@@ -18,7 +18,7 @@ export default async function BrowsePodcasts({
 
   if (q) query = query.ilike('title', `%${q}%`);
 
-  const { data: podcasts } = await query;
+  const { data: podcasts, error } = await query;
 
   return (
     <div>
@@ -39,7 +39,11 @@ export default async function BrowsePodcasts({
         />
       </form>
 
-      {!podcasts || podcasts.length === 0 ? (
+      {error ? (
+        <p className="mt-10 rounded border border-rust/40 bg-rust/5 p-4 text-sm text-rust">
+          Couldn&rsquo;t load podcasts: {error.message}
+        </p>
+      ) : !podcasts || podcasts.length === 0 ? (
         <p className="mt-10 text-slate">
           {q ? `No podcasts matching "${q}".` : 'No podcasts yet — be the first to add one.'}
         </p>

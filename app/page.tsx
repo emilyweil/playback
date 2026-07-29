@@ -124,7 +124,7 @@ function Hero() {
 
       <div className="relative bg-gradient-to-t from-surface via-surface/85 to-surface/20 px-8 py-20 text-center">
         <h1 className="mx-auto max-w-xl font-display text-3xl font-semibold leading-tight text-cream sm:text-4xl">
-          Track podcasts you&rsquo;ve listened to.
+          <span className="whitespace-nowrap text-2xl sm:text-3xl">Track podcasts you&rsquo;ve listened to.</span>
           <br />
           Save those you want to hear.
           <br />

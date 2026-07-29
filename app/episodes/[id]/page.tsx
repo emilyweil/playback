@@ -11,11 +11,19 @@ export default async function EpisodePage({ params }: { params: { id: string } }
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: episodeData } = await supabase
+  const { data: episodeData, error: episodeError } = await supabase
     .from('episodes')
     .select('*, podcasts(title, slug, cover_url), episode_stats(average_rating, rating_count, log_count)')
     .eq('id', params.id)
     .single();
+
+  if (episodeError && episodeError.code !== 'PGRST116') {
+    return (
+      <p className="rounded border border-rust/40 bg-rust/5 p-4 text-sm text-rust">
+        Couldn&rsquo;t load this episode: {episodeError.message}
+      </p>
+    );
+  }
 
   const episode = episodeData as any;
 

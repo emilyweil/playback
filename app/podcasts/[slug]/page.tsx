@@ -12,11 +12,22 @@ export default async function PodcastPage({ params }: { params: { slug: string }
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: podcast } = await supabase
+  const { data: podcast, error: podcastError } = await supabase
     .from('podcasts')
     .select('*, podcast_stats(average_rating, rating_count, log_count)')
     .eq('slug', params.slug)
     .single();
+
+  // PGRST116 = "no rows found", the only case that's a genuine 404. Any
+  // other error (e.g. a permissions issue on a joined view) should be
+  // visible, not silently swallowed into a misleading not-found page.
+  if (podcastError && podcastError.code !== 'PGRST116') {
+    return (
+      <p className="rounded border border-rust/40 bg-rust/5 p-4 text-sm text-rust">
+        Couldn&rsquo;t load this podcast: {podcastError.message}
+      </p>
+    );
+  }
 
   if (!podcast) notFound();
 

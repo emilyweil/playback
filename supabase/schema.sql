@@ -273,6 +273,13 @@ from public.episodes e
 left join public.reviews r on r.episode_id = e.id
 group by e.id;
 
+-- Views don't reliably inherit Supabase's default role grants the way
+-- ordinary tables do — without this, any query joining against these views
+-- (e.g. the podcast/episode browse and detail pages) fails silently for the
+-- anon/authenticated roles even though RLS on the underlying tables is fine.
+grant select on public.podcast_stats to anon, authenticated;
+grant select on public.episode_stats to anon, authenticated;
+
 -- ============================================================================
 -- 11. ROW LEVEL SECURITY
 -- ============================================================================
