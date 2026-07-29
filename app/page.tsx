@@ -30,7 +30,7 @@ export default async function HomePage() {
             <h2 className="font-display text-sm font-semibold uppercase tracking-wide2 text-slate">
               Recently logged
             </h2>
-            <div className="mt-4">
+            <div className="mt-4 rounded border border-line bg-surface px-5">
               {recentReviews.map((r: any) => (
                 <ReviewCard key={r.id} review={r} />
               ))}
@@ -71,7 +71,7 @@ export default async function HomePage() {
       {!feed || feed.length === 0 ? (
         <EmptyFeed />
       ) : (
-        <div className="mt-6">
+        <div className="mt-6 rounded border border-line bg-surface px-5">
           {feed.map((r: any) => (
             <ReviewCard key={r.id} review={r} />
           ))}
@@ -107,7 +107,7 @@ function Hero() {
   }));
 
   return (
-    <section className="relative overflow-hidden rounded border border-line">
+    <section className="relative overflow-hidden rounded border border-line bg-surface">
       <div className="absolute inset-0 flex items-end justify-center gap-[3px] px-6 pb-0 opacity-40">
         {back.map((b, i) => (
           <span
@@ -122,7 +122,7 @@ function Hero() {
         ))}
       </div>
 
-      <div className="relative bg-gradient-to-t from-ink via-ink/80 to-ink/10 px-8 py-20 text-center">
+      <div className="relative bg-gradient-to-t from-surface via-surface/85 to-surface/20 px-8 py-20 text-center">
         <h1 className="mx-auto max-w-xl font-display text-3xl font-semibold leading-tight text-cream sm:text-4xl">
           Track podcasts you&rsquo;ve listened to.
           <br />

@@ -4,7 +4,7 @@ import SignOutButton from '@/components/SignOutButton';
 
 export default function Nav({ profile }: { profile: Profile | null }) {
   return (
-    <header className="border-b border-line">
+    <header className="border-b border-line bg-surface shadow-sm">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
         <Link href="/" className="flex items-center gap-2">
           <WaveMark />

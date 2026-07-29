@@ -5,15 +5,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: '#14181C',
-        surface: '#1B2129',
-        raised: '#232B34',
-        line: '#2C343D',
-        cream: '#EDE6D6',
-        slate: '#8B95A1',
-        amber: '#E8A33D',
-        signal: '#4FA37A',
-        rust: '#C4633B',
+        paper: '#FAF7EF',
+        ink: '#2B2A24',
+        surface: '#FFFFFF',
+        raised: '#F1ECDC',
+        line: '#E4DECA',
+        cream: '#2B2A24',
+        slate: '#726B57',
+        amber: '#C97F17',
+        signal: '#3F8F68',
+        rust: '#B24B27',
       },
       fontFamily: {
         display: ['var(--font-display)'],

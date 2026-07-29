@@ -3,22 +3,22 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html,
 body {
-  background-color: #14181C;
-  color: #EDE6D6;
+  background-color: #FAF7EF;
+  color: #2B2A24;
 }
 
 * {
-  border-color: #2C343D;
+  border-color: #E4DECA;
 }
 
 ::selection {
-  background-color: #E8A33D;
-  color: #14181C;
+  background-color: #C97F17;
+  color: #FAF7EF;
 }
 
 a {
@@ -26,7 +26,7 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid #E8A33D;
+  outline: 2px solid #C97F17;
   outline-offset: 2px;
 }
 
@@ -53,7 +53,7 @@ a {
 }
 
 .hairline {
-  border-top: 1px solid #2C343D;
+  border-top: 1px solid #E4DECA;
 }
 
 @layer components {

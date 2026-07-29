@@ -87,7 +87,7 @@ export default async function ProfilePage({ params }: { params: { username: stri
         {!reviews || reviews.length === 0 ? (
           <p className="mt-3 text-sm text-slate">No activity yet.</p>
         ) : (
-          <div className="mt-4">
+          <div className="mt-4 rounded border border-line bg-surface px-5">
             {reviews.map((r: any) => (
               <ReviewCard key={r.id} review={{ ...r, profiles: profile }} showAuthor={false} />
             ))}
