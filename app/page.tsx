@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import ReviewCard from '@/components/ReviewCard';
 import RatingStars from '@/components/RatingStars';
 import PodcastCard from '@/components/PodcastCard';
+import FriendAddedPodcasts from '@/components/FriendAddedPodcasts';
 
 const REVIEW_SELECT = `
   id, rating, body, contains_spoilers, is_relisten, listened_at, created_at, episode_id,
@@ -65,23 +66,13 @@ export default async function HomePage({ searchParams }: { searchParams: { q?: s
     );
   }
 
-  // Signed in: build a following-based feed, falling back to global recent
-  // activity if the person doesn't follow anyone yet.
+  // Signed in
   const { data: followingRows } = await supabase
     .from('follows')
     .select('following_id')
     .eq('follower_id', user.id);
   const followingIds = (followingRows ?? []).map((f) => f.following_id);
 
-  const feedIds = followingIds.length > 0 ? [...followingIds, user.id] : null;
-
-  const feedQuery = supabase
-    .from('reviews')
-    .select(REVIEW_SELECT)
-    .order('created_at', { ascending: false })
-    .limit(30);
-
-  const { data: feed } = feedIds ? await feedQuery.in('user_id', feedIds) : await feedQuery;
   const recentlyReviewed = await getRecentlyReviewedPodcasts(supabase);
   const recentlyAdded = await getRecentlyAddedPodcasts(supabase);
 
@@ -97,27 +88,7 @@ export default async function HomePage({ searchParams }: { searchParams: { q?: s
   return (
     <div>
       <h1 className="font-display text-2xl font-semibold text-cream">Friend feed</h1>
-      <p className="mt-1 text-sm text-slate">
-        {followingIds.length > 0 ? (
-          'Recent activity from people you follow.'
-        ) : (
-          <>
-            You&rsquo;re not following anyone yet —{' '}
-            <Link href="/friends/find" className="text-cream hover:text-amber">
-              find friends
-            </Link>
-            .
-          </>
-        )}
-      </p>
-
-      {feed && feed.length > 0 && (
-        <div className="mt-6 rounded border border-line bg-surface px-5">
-          {feed.map((r: any) => (
-            <ReviewCard key={r.id} review={r} />
-          ))}
-        </div>
-      )}
+      <FriendAddedPodcasts followingIds={followingIds} />
 
       <RecentlyAdded items={recentlyAdded} />
       <RecentlyReviewed items={recentlyReviewed} />

@@ -38,6 +38,13 @@ export default function ProfileMenu({ profile }: { profile: Profile }) {
             Find friends
           </Link>
           <Link
+            href="/friends"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2 text-sm text-cream hover:bg-raised"
+          >
+            Friends
+          </Link>
+          <Link
             href="/friends/feed"
             onClick={() => setOpen(false)}
             className="block px-4 py-2 text-sm text-cream hover:bg-raised"
