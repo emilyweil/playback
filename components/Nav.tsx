@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Profile } from '@/lib/supabase/types';
-import SignOutButton from '@/components/SignOutButton';
+import ProfileMenu from '@/components/ProfileMenu';
 
 export default function Nav({ profile }: { profile: Profile | null }) {
   return (
@@ -22,15 +22,7 @@ export default function Nav({ profile }: { profile: Profile | null }) {
           </Link>
 
           {profile ? (
-            <>
-              <Link
-                href={`/u/${profile.username}`}
-                className="rounded border border-line px-3 py-1.5 text-cream hover:border-amber transition-colors"
-              >
-                {profile.display_name || profile.username}
-              </Link>
-              <SignOutButton />
-            </>
+            <ProfileMenu profile={profile} />
           ) : (
             <>
               <Link href="/login" className="text-slate hover:text-cream transition-colors">

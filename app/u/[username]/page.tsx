@@ -1,7 +1,6 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import ReviewCard from '@/components/ReviewCard';
+import DiaryEntryCard from '@/components/DiaryEntryCard';
 import FollowButton from '@/components/FollowButton';
 
 export default async function ProfilePage({ params }: { params: { username: string } }) {
@@ -24,12 +23,14 @@ export default async function ProfilePage({ params }: { params: { username: stri
     supabase
       .from('reviews')
       .select(
-        'id, rating, body, contains_spoilers, is_relisten, listened_at, created_at, episode_id, podcasts(title, slug), episodes(title, episode_number, season_number, podcasts(title, slug))'
+        'id, rating, body, listened_at, created_at, episode_id, podcasts(title, slug, cover_url), episodes(title, episode_number, season_number, podcasts(title, slug, cover_url))'
       )
       .eq('user_id', profile.id)
       .order('created_at', { ascending: false })
       .limit(30),
   ]);
+
+  const isOwner = user?.id === profile.id;
 
   let alreadyFollowing = false;
   if (user && user.id !== profile.id) {
@@ -66,7 +67,7 @@ export default async function ProfilePage({ params }: { params: { username: stri
         ) : (
           <div className="mt-4 rounded border border-line bg-surface px-5">
             {reviews.map((r: any) => (
-              <ReviewCard key={r.id} review={{ ...r, profiles: profile }} showAuthor={false} />
+              <DiaryEntryCard key={r.id} entry={r} isOwner={isOwner} />
             ))}
           </div>
         )}
