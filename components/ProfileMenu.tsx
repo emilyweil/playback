@@ -57,7 +57,7 @@ export default function ProfileMenu({ profile }: { profile: Profile }) {
             onClick={() => setOpen(false)}
             className="block px-4 py-2 text-sm text-cream hover:bg-raised"
           >
-            View full profile
+            Profile & Diary
           </Link>
           <div className="px-4 py-2">
             <SignOutButton />

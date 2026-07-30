@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import FollowButton from '@/components/FollowButton';
+import BlockButton from '@/components/BlockButton';
 
 export default async function FriendsPage() {
   const supabase = createClient();
@@ -31,7 +32,6 @@ export default async function FriendsPage() {
   ]);
 
   const following = (followingRows ?? []).map((f: any) => f.profiles).filter(Boolean);
-  const followingIdSet = new Set(following.map((p: any) => p.id));
   const followers = (followerRows ?? []).map((f: any) => f.profiles).filter(Boolean);
 
   return (
@@ -77,7 +77,7 @@ export default async function FriendsPage() {
                 <Link href={`/u/${p.username}`} className="text-sm text-cream hover:text-amber">
                   {p.display_name || p.username}
                 </Link>
-                <FollowButton viewerId={user.id} targetId={p.id} initiallyFollowing={followingIdSet.has(p.id)} />
+                <BlockButton viewerId={user.id} targetId={p.id} />
               </li>
             ))}
           </ul>

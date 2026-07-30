@@ -184,6 +184,39 @@ create table public.follows (
 create index follows_following_id_idx on public.follows (following_id);
 
 -- ============================================================================
+-- 6b. BLOCKS
+-- ============================================================================
+
+create table public.blocks (
+  blocker_id uuid not null references public.profiles (id) on delete cascade,
+  blocked_id uuid not null references public.profiles (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (blocker_id, blocked_id),
+  constraint no_self_block check (blocker_id <> blocked_id)
+);
+
+create index blocks_blocked_id_idx on public.blocks (blocked_id);
+
+-- Blocking someone immediately removes any existing follow relationship
+-- between the two of you, in either direction.
+create or replace function public.handle_new_block()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  delete from public.follows
+  where (follower_id = new.blocker_id and following_id = new.blocked_id)
+     or (follower_id = new.blocked_id and following_id = new.blocker_id);
+  return new;
+end;
+$$;
+
+create trigger on_block_created
+  after insert on public.blocks
+  for each row execute procedure public.handle_new_block();
+
+-- ============================================================================
 -- 7. REVIEW LIKES + COMMENTS
 -- ============================================================================
 
@@ -292,6 +325,7 @@ alter table public.genres enable row level security;
 alter table public.podcast_genres enable row level security;
 alter table public.reviews enable row level security;
 alter table public.follows enable row level security;
+alter table public.blocks enable row level security;
 alter table public.review_likes enable row level security;
 alter table public.review_comments enable row level security;
 alter table public.podcast_statuses enable row level security;
@@ -351,9 +385,24 @@ create policy "users can delete their own reviews" on public.reviews
 create policy "follows are publicly readable" on public.follows
   for select using (true);
 create policy "users can follow as themselves" on public.follows
-  for insert with check (auth.uid() = follower_id);
+  for insert with check (
+    auth.uid() = follower_id
+    and not exists (
+      select 1 from public.blocks b
+      where (b.blocker_id = follower_id and b.blocked_id = following_id)
+         or (b.blocker_id = following_id and b.blocked_id = follower_id)
+    )
+  );
 create policy "users can unfollow as themselves" on public.follows
   for delete using (auth.uid() = follower_id);
+
+-- blocks: only the blocker can see, create, or remove their own blocks
+create policy "users can view their own blocks" on public.blocks
+  for select using (auth.uid() = blocker_id);
+create policy "users can create their own blocks" on public.blocks
+  for insert with check (auth.uid() = blocker_id);
+create policy "users can remove their own blocks" on public.blocks
+  for delete using (auth.uid() = blocker_id);
 
 -- review_likes
 create policy "review_likes are publicly readable" on public.review_likes
