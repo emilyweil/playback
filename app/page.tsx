@@ -31,7 +31,7 @@ async function getRecentlyAddedPodcasts(supabase: ReturnType<typeof createClient
   return data ?? [];
 }
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: { searchParams: { q?: string } }) {
   const supabase = createClient();
   const {
     data: { user },
@@ -85,6 +85,15 @@ export default async function HomePage() {
   const recentlyReviewed = await getRecentlyReviewedPodcasts(supabase);
   const recentlyAdded = await getRecentlyAddedPodcasts(supabase);
 
+  const q = searchParams.q?.trim();
+  let browseQuery = supabase
+    .from('podcasts')
+    .select('id, slug, title, cover_url, host_names')
+    .order('created_at', { ascending: false })
+    .limit(24);
+  if (q) browseQuery = browseQuery.ilike('title', `%${q}%`);
+  const { data: browsePodcasts } = await browseQuery;
+
   return (
     <div>
       <h1 className="font-display text-2xl font-semibold text-cream">Your feed</h1>
@@ -102,9 +111,7 @@ export default async function HomePage() {
         )}
       </p>
 
-      {!feed || feed.length === 0 ? (
-        <EmptyFeed />
-      ) : (
+      {feed && feed.length > 0 && (
         <div className="mt-6 rounded border border-line bg-surface px-5">
           {feed.map((r: any) => (
             <ReviewCard key={r.id} review={r} />
@@ -114,7 +121,36 @@ export default async function HomePage() {
 
       <RecentlyAdded items={recentlyAdded} />
       <RecentlyReviewed items={recentlyReviewed} />
+      <BrowseAll items={browsePodcasts ?? []} q={q} />
     </div>
+  );
+}
+
+function BrowseAll({ items, q }: { items: any[]; q?: string }) {
+  return (
+    <section className="mt-16">
+      <h2 className="font-display text-2xl font-semibold text-cream">Browse all podcasts</h2>
+
+      <form className="mt-4">
+        <input
+          type="search"
+          name="q"
+          defaultValue={q}
+          placeholder="Search by title…"
+          className="input w-full max-w-md"
+        />
+      </form>
+
+      {items.length === 0 ? (
+        <p className="mt-6 text-sm text-slate">{q ? `No podcasts matching "${q}".` : 'No podcasts yet.'}</p>
+      ) : (
+        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+          {items.map((p) => (
+            <PodcastCard key={p.id} slug={p.slug} title={p.title} coverUrl={p.cover_url} hostNames={p.host_names} />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -124,9 +160,7 @@ function RecentlyAdded({ items }: { items: any[] }) {
   return (
     <section className="mt-16">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="font-display text-sm font-semibold uppercase tracking-wide2 text-slate">
-          Recently added podcasts
-        </h2>
+        <h2 className="font-display text-2xl font-semibold text-cream">Recently added podcasts</h2>
         <Link href="/podcasts/new" className="btn-secondary text-sm">
           + Add a podcast
         </Link>
@@ -142,9 +176,6 @@ function RecentlyAdded({ items }: { items: any[] }) {
           />
         ))}
       </div>
-      <Link href="/podcasts" className="mt-4 inline-block text-sm text-slate hover:text-amber">
-        Browse all podcasts →
-      </Link>
     </section>
   );
 }
@@ -186,22 +217,6 @@ function RecentlyReviewed({ items }: { items: any[] }) {
         ))}
       </div>
     </section>
-  );
-}
-
-function EmptyFeed() {
-  return (
-    <div className="mt-8 rounded border border-line p-8 text-center">
-      <p className="text-slate">Nothing here yet.</p>
-      <div className="mt-4 flex justify-center gap-3">
-        <Link href="/podcasts" className="rounded bg-amber px-4 py-2 text-sm font-medium text-ink">
-          Browse podcasts
-        </Link>
-        <Link href="/podcasts/new" className="rounded border border-line px-4 py-2 text-sm text-cream">
-          Add one
-        </Link>
-      </div>
-    </div>
   );
 }
 

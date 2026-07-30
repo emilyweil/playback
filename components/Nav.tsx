@@ -6,7 +6,7 @@ export default function Nav({ profile }: { profile: Profile | null }) {
   return (
     <header className="border-b border-line bg-surface shadow-sm">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
-        <Link href="/podcasts" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <WaveMark />
           <span className="font-display text-lg font-semibold tracking-wide2 text-cream">
             PLAYBACK
@@ -14,9 +14,6 @@ export default function Nav({ profile }: { profile: Profile | null }) {
         </Link>
 
         <nav className="flex items-center gap-5 text-sm">
-          <Link href="/podcasts" className="text-slate hover:text-cream transition-colors">
-            Browse
-          </Link>
           <Link href="/podcasts/new" className="text-slate hover:text-cream transition-colors">
             Add a podcast
           </Link>
