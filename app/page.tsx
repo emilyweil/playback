@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import ReviewCard from '@/components/ReviewCard';
+import RatingWaveform from '@/components/RatingWaveform';
 
 const REVIEW_SELECT = `
   id, rating, body, contains_spoilers, is_relisten, listened_at, created_at, episode_id,
@@ -8,6 +9,17 @@ const REVIEW_SELECT = `
   podcasts ( title, slug ),
   episodes ( title, episode_number, season_number, podcasts ( title, slug ) )
 `;
+
+async function getRecentlyReviewedPodcasts(supabase: ReturnType<typeof createClient>) {
+  const { data } = await supabase
+    .from('reviews')
+    .select('id, rating, body, created_at, profiles(username, display_name), podcasts(title, slug, cover_url)')
+    .not('podcast_id', 'is', null)
+    .not('body', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(6);
+  return data ?? [];
+}
 
 export default async function HomePage() {
   const supabase = createClient();
@@ -21,10 +33,12 @@ export default async function HomePage() {
       .select(REVIEW_SELECT)
       .order('created_at', { ascending: false })
       .limit(8);
+    const recentlyReviewed = await getRecentlyReviewedPodcasts(supabase);
 
     return (
       <div>
         <Hero />
+        <RecentlyReviewed items={recentlyReviewed} />
         {recentReviews && recentReviews.length > 0 && (
           <section className="mt-16">
             <h2 className="font-display text-sm font-semibold uppercase tracking-wide2 text-slate">
@@ -58,6 +72,7 @@ export default async function HomePage() {
     .limit(30);
 
   const { data: feed } = feedIds ? await feedQuery.in('user_id', feedIds) : await feedQuery;
+  const recentlyReviewed = await getRecentlyReviewedPodcasts(supabase);
 
   return (
     <div>
@@ -77,7 +92,49 @@ export default async function HomePage() {
           ))}
         </div>
       )}
+
+      <RecentlyReviewed items={recentlyReviewed} />
     </div>
+  );
+}
+
+function RecentlyReviewed({ items }: { items: any[] }) {
+  if (!items || items.length === 0) return null;
+
+  return (
+    <section className="mt-16">
+      <h2 className="font-display text-sm font-semibold uppercase tracking-wide2 text-slate">
+        Recently reviewed podcasts
+      </h2>
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {items.map((r) => (
+          <Link
+            key={r.id}
+            href={`/podcasts/${r.podcasts?.slug}`}
+            className="flex gap-3 rounded border border-line bg-surface p-4 transition-colors hover:border-amber"
+          >
+            <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded bg-raised">
+              {r.podcasts?.cover_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={r.podcasts.cover_url} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center font-display text-lg text-slate">
+                  {r.podcasts?.title?.charAt(0).toUpperCase()}
+                </div>
+              )}
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="truncate font-display text-sm font-medium text-cream">{r.podcasts?.title}</h3>
+                <RatingWaveform rating={r.rating} size="sm" />
+              </div>
+              <p className="mt-1 line-clamp-2 text-sm text-cream/80">{r.body}</p>
+              <p className="mt-1 text-xs text-slate">— {r.profiles?.display_name || r.profiles?.username}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
 

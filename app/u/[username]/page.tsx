@@ -18,24 +18,18 @@ export default async function ProfilePage({ params }: { params: { username: stri
 
   if (!profile) notFound();
 
-  const [{ count: followerCount }, { count: followingCount }, { data: reviews }, { data: lists }] =
-    await Promise.all([
-      supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', profile.id),
-      supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', profile.id),
-      supabase
-        .from('reviews')
-        .select(
-          'id, rating, body, contains_spoilers, is_relisten, listened_at, created_at, episode_id, podcasts(title, slug), episodes(title, episode_number, season_number, podcasts(title, slug))'
-        )
-        .eq('user_id', profile.id)
-        .order('created_at', { ascending: false })
-        .limit(30),
-      supabase
-        .from('lists')
-        .select('id, title, description')
-        .eq('user_id', profile.id)
-        .order('created_at', { ascending: false }),
-    ]);
+  const [{ count: followerCount }, { count: followingCount }, { data: reviews }] = await Promise.all([
+    supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', profile.id),
+    supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', profile.id),
+    supabase
+      .from('reviews')
+      .select(
+        'id, rating, body, contains_spoilers, is_relisten, listened_at, created_at, episode_id, podcasts(title, slug), episodes(title, episode_number, season_number, podcasts(title, slug))'
+      )
+      .eq('user_id', profile.id)
+      .order('created_at', { ascending: false })
+      .limit(30),
+  ]);
 
   let alreadyFollowing = false;
   if (user && user.id !== profile.id) {
@@ -64,23 +58,6 @@ export default async function ProfilePage({ params }: { params: { username: stri
         </div>
         <FollowButton viewerId={user?.id ?? null} targetId={profile.id} initiallyFollowing={alreadyFollowing} />
       </div>
-
-      <section className="mt-10">
-        <h2 className="font-display text-sm font-semibold uppercase tracking-wide2 text-slate">Lists</h2>
-        {!lists || lists.length === 0 ? (
-          <p className="mt-3 text-sm text-slate">No lists yet.</p>
-        ) : (
-          <ul className="mt-3 flex flex-wrap gap-3">
-            {lists.map((l) => (
-              <li key={l.id}>
-                <Link href={`/lists/${l.id}`} className="rounded border border-line px-3 py-1.5 text-sm text-cream hover:border-amber">
-                  {l.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
 
       <section className="mt-10">
         <h2 className="font-display text-sm font-semibold uppercase tracking-wide2 text-slate">Diary</h2>

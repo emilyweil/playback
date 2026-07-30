@@ -20,9 +20,6 @@ export default function Nav({ profile }: { profile: Profile | null }) {
           <Link href="/podcasts/new" className="text-slate hover:text-cream transition-colors">
             Add a podcast
           </Link>
-          <Link href="/lists" className="text-slate hover:text-cream transition-colors">
-            Lists
-          </Link>
 
           {profile ? (
             <>

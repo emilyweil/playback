@@ -1,12 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
 export default function SignupPage() {
-  const router = useRouter();
   const supabase = createClient();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -41,8 +39,8 @@ export default function SignupPage() {
     }
 
     if (data.session) {
-      router.refresh();
-      router.push('/');
+      // See app/login/page.tsx for why this is a hard navigation, not router.push.
+      window.location.href = '/';
     } else {
       // Email confirmation is required before a session exists.
       setCheckEmail(true);

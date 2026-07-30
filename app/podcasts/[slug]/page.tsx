@@ -5,6 +5,7 @@ import RatingWaveform from '@/components/RatingWaveform';
 import ReviewForm from '@/components/ReviewForm';
 import ReviewCard from '@/components/ReviewCard';
 import StatusSelector from '@/components/StatusSelector';
+import DeletePodcastButton from '@/components/DeletePodcastButton';
 
 export default async function PodcastPage({ params }: { params: { slug: string } }) {
   const supabase = createClient();
@@ -121,8 +122,14 @@ export default async function PodcastPage({ params }: { params: { slug: string }
             </Link>
           </div>
 
-          <div className="mt-5">
+          <div className="mt-5 flex items-center justify-between gap-4">
             <StatusSelector podcastId={podcast.id} userId={user?.id ?? null} initialStatus={myStatus} />
+            <DeletePodcastButton
+              podcastId={podcast.id}
+              podcastTitle={podcast.title}
+              userId={user?.id ?? null}
+              addedBy={podcast.added_by}
+            />
           </div>
         </div>
       </div>

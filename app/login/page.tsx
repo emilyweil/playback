@@ -1,12 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
-  const router = useRouter();
   const supabase = createClient();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,8 +21,11 @@ export default function LoginPage() {
       setError(error.message);
       return;
     }
-    router.refresh();
-    router.push('/');
+    // A hard navigation (not router.push) guarantees the server sees the
+    // freshly-set auth cookie on the very next request — a soft client-side
+    // navigation can occasionally render before it's readable, leaving the
+    // nav looking signed-out even though the sign-in succeeded.
+    window.location.href = '/';
   }
 
   return (
