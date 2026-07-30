@@ -74,7 +74,7 @@ export default function DiaryEntryCard({ entry, isOwner }: { entry: Entry; isOwn
   }
 
   return (
-    <article className="flex gap-4 border-b border-line py-5 first:pt-0 last:border-b-0">
+    <article className="flex gap-4 border-b border-line py-5 last:border-b-0">
       <Link href={href} className="h-16 w-16 flex-shrink-0 overflow-hidden rounded bg-raised">
         {podcast?.cover_url ? (
           // eslint-disable-next-line @next/next/no-img-element
