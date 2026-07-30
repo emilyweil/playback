@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import ReviewCard from '@/components/ReviewCard';
 import RatingStars from '@/components/RatingStars';
+import PodcastCard from '@/components/PodcastCard';
 
 const REVIEW_SELECT = `
   id, rating, body, contains_spoilers, is_relisten, listened_at, created_at, episode_id,
@@ -16,6 +17,15 @@ async function getRecentlyReviewedPodcasts(supabase: ReturnType<typeof createCli
     .select('id, rating, body, created_at, profiles(username, display_name), podcasts(title, slug, cover_url)')
     .not('podcast_id', 'is', null)
     .not('body', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(6);
+  return data ?? [];
+}
+
+async function getRecentlyAddedPodcasts(supabase: ReturnType<typeof createClient>) {
+  const { data } = await supabase
+    .from('podcasts')
+    .select('id, slug, title, cover_url, host_names')
     .order('created_at', { ascending: false })
     .limit(6);
   return data ?? [];
@@ -73,14 +83,23 @@ export default async function HomePage() {
 
   const { data: feed } = feedIds ? await feedQuery.in('user_id', feedIds) : await feedQuery;
   const recentlyReviewed = await getRecentlyReviewedPodcasts(supabase);
+  const recentlyAdded = await getRecentlyAddedPodcasts(supabase);
 
   return (
     <div>
       <h1 className="font-display text-2xl font-semibold text-cream">Your feed</h1>
       <p className="mt-1 text-sm text-slate">
-        {followingIds.length > 0
-          ? 'Recent activity from people you follow.'
-          : "You're not following anyone yet — here's what's happening on Playback."}
+        {followingIds.length > 0 ? (
+          'Recent activity from people you follow.'
+        ) : (
+          <>
+            You&rsquo;re not following anyone yet —{' '}
+            <Link href="/friends/find" className="text-cream hover:text-amber">
+              find friends
+            </Link>
+            .
+          </>
+        )}
       </p>
 
       {!feed || feed.length === 0 ? (
@@ -93,8 +112,40 @@ export default async function HomePage() {
         </div>
       )}
 
+      <RecentlyAdded items={recentlyAdded} />
       <RecentlyReviewed items={recentlyReviewed} />
     </div>
+  );
+}
+
+function RecentlyAdded({ items }: { items: any[] }) {
+  if (!items || items.length === 0) return null;
+
+  return (
+    <section className="mt-16">
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="font-display text-sm font-semibold uppercase tracking-wide2 text-slate">
+          Recently added podcasts
+        </h2>
+        <Link href="/podcasts/new" className="btn-secondary text-sm">
+          + Add a podcast
+        </Link>
+      </div>
+      <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+        {items.map((p) => (
+          <PodcastCard
+            key={p.id}
+            slug={p.slug}
+            title={p.title}
+            coverUrl={p.cover_url}
+            hostNames={p.host_names}
+          />
+        ))}
+      </div>
+      <Link href="/podcasts" className="mt-4 inline-block text-sm text-slate hover:text-amber">
+        Browse all podcasts →
+      </Link>
+    </section>
   );
 }
 

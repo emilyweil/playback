@@ -18,6 +18,7 @@ create table public.profiles (
   username text not null unique,
   display_name text,
   bio text,
+  location text,
   avatar_url text,
   created_at timestamptz not null default now()
 );

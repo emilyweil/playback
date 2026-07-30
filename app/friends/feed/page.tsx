@@ -65,7 +65,7 @@ export default async function FriendFeedPage() {
                 <Link href={`/u/${p.username}`} className="text-sm text-cream hover:text-amber">
                   {p.display_name || p.username}
                 </Link>
-                <FollowButton viewerId={user.id} targetId={p.id} initiallyFollowing={true} />
+                <FollowButton viewerId={user.id} targetId={p.id} initiallyFollowing={true} followingLabel="Unfollow" />
               </li>
             ))}
           </ul>

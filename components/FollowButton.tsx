@@ -8,10 +8,12 @@ export default function FollowButton({
   viewerId,
   targetId,
   initiallyFollowing,
+  followingLabel = 'Following',
 }: {
   viewerId: string | null;
   targetId: string;
   initiallyFollowing: boolean;
+  followingLabel?: string;
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -38,7 +40,7 @@ export default function FollowButton({
       disabled={loading}
       className={following ? 'btn-secondary text-sm' : 'btn-primary text-sm'}
     >
-      {following ? 'Following' : 'Follow'}
+      {following ? followingLabel : 'Follow'}
     </button>
   );
 }

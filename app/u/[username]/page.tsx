@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import DiaryEntryCard from '@/components/DiaryEntryCard';
@@ -46,15 +47,33 @@ export default async function ProfilePage({ params }: { params: { username: stri
   return (
     <div>
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="font-display text-2xl font-semibold text-cream">
-            {profile.display_name || profile.username}
-          </h1>
-          <p className="text-sm text-slate">@{profile.username}</p>
-          {profile.bio && <p className="mt-3 max-w-xl text-cream/85">{profile.bio}</p>}
-          <div className="mt-3 flex gap-4 font-mono text-xs text-slate">
-            <span>{followerCount ?? 0} followers</span>
-            <span>{followingCount ?? 0} following</span>
+        <div className="flex gap-4">
+          <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-full bg-raised">
+            {profile.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center font-display text-xl text-slate">
+                {(profile.display_name || profile.username).charAt(0).toUpperCase()}
+              </div>
+            )}
+          </div>
+          <div>
+            <h1 className="font-display text-2xl font-semibold text-cream">
+              {profile.display_name || profile.username}
+            </h1>
+            <p className="text-sm text-slate">@{profile.username}</p>
+            {isOwner && (
+              <Link href="/profile/edit" className="text-xs text-slate hover:text-amber">
+                Edit profile
+              </Link>
+            )}
+            {profile.bio && <p className="mt-3 max-w-xl text-cream/85">{profile.bio}</p>}
+            {profile.location && <p className="mt-1 text-sm text-slate">📍 {profile.location}</p>}
+            <div className="mt-3 flex gap-4 font-mono text-xs text-slate">
+              <span>{followerCount ?? 0} followers</span>
+              <span>{followingCount ?? 0} following</span>
+            </div>
           </div>
         </div>
         <FollowButton viewerId={user?.id ?? null} targetId={profile.id} initiallyFollowing={alreadyFollowing} />
