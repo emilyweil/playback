@@ -115,8 +115,6 @@ export default async function PodcastPage({ params }: { params: { slug: string }
             </span>
           </div>
 
-          {podcast.description && <p className="mt-4 max-w-2xl text-cream/85">{podcast.description}</p>}
-
           <div className="mt-4 flex flex-wrap gap-4 text-sm">
             {podcast.website_url && (
               <a href={podcast.website_url} target="_blank" className="text-slate hover:text-amber">
@@ -146,9 +144,6 @@ export default async function PodcastPage({ params }: { params: { slug: string }
       </div>
 
       <section className="mt-10">
-        <h2 className="font-display text-sm font-semibold uppercase tracking-wide2 text-slate">
-          Episodes {episodes ? `(${episodes.length})` : ''}
-        </h2>
         {!episodes || episodes.length === 0 ? (
           <p className="mt-3 text-sm text-slate">No episodes logged yet.</p>
         ) : (
@@ -183,6 +178,7 @@ export default async function PodcastPage({ params }: { params: { slug: string }
 
       <section className="mt-10">
         <h2 className="font-display text-sm font-semibold uppercase tracking-wide2 text-slate">Reviews</h2>
+        {podcast.description && <p className="mt-3 max-w-2xl text-cream/85">{podcast.description}</p>}
         {!reviews || reviews.length === 0 ? (
           <p className="mt-3 text-sm text-slate">No reviews yet.</p>
         ) : (

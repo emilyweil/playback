@@ -65,6 +65,8 @@ export default function SignupPage() {
         <Field label="Username">
           <input
             required
+            name="username"
+            autoComplete="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="lowercase, no spaces"
@@ -74,6 +76,8 @@ export default function SignupPage() {
         <Field label="Email">
           <input
             type="email"
+            name="email"
+            autoComplete="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -83,6 +87,8 @@ export default function SignupPage() {
         <Field label="Password">
           <input
             type="password"
+            name="password"
+            autoComplete="new-password"
             required
             minLength={6}
             value={password}
