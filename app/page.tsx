@@ -96,7 +96,7 @@ export default async function HomePage({ searchParams }: { searchParams: { q?: s
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-semibold text-cream">Your feed</h1>
+      <h1 className="font-display text-2xl font-semibold text-cream">Friend feed</h1>
       <p className="mt-1 text-sm text-slate">
         {followingIds.length > 0 ? (
           'Recent activity from people you follow.'
@@ -160,7 +160,7 @@ function RecentlyAdded({ items }: { items: any[] }) {
   return (
     <section className="mt-16">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="font-display text-2xl font-semibold text-cream">Recently added podcasts</h2>
+        <h2 className="font-display text-2xl font-semibold text-cream">Recently added podcasts from everyone</h2>
         <Link href="/podcasts/new" className="btn-secondary text-sm">
           + Add a podcast
         </Link>
