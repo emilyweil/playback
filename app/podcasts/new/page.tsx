@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import RatingWaveform from '@/components/RatingWaveform';
+import RatingStars from '@/components/RatingStars';
 
 function slugify(title: string) {
   return title
@@ -22,12 +22,11 @@ export default function NewPodcastPage() {
   const [userId, setUserId] = useState<string | null | undefined>(undefined);
 
   const [title, setTitle] = useState('');
-  const [hostNames, setHostNames] = useState('');
   const [description, setDescription] = useState('');
   const [coverUrl, setCoverUrl] = useState('');
-  const [rssUrl, setRssUrl] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [rating, setRating] = useState<number | null>(null);
+  const [listenedAt, setListenedAt] = useState(() => new Date().toISOString().slice(0, 10));
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -86,10 +85,8 @@ export default function NewPodcastPage() {
         .insert({
           title: title.trim(),
           slug,
-          host_names: hostNames.trim() || null,
           description: description.trim() || null,
           cover_url: coverUrl.trim() || null,
-          rss_url: rssUrl.trim() || null,
           website_url: websiteUrl.trim() || null,
           added_by: userId,
         })
@@ -131,7 +128,7 @@ export default function NewPodcastPage() {
       user_id: userId,
       podcast_id: podcastId,
       rating,
-      listened_at: new Date().toISOString().slice(0, 10),
+      listened_at: listenedAt,
     });
 
     setLoading(false);
@@ -143,6 +140,7 @@ export default function NewPodcastPage() {
     }
 
     router.push(`/podcasts/${podcastSlug}`);
+    router.refresh();
   }
 
   if (userId === undefined) return null;
@@ -200,14 +198,6 @@ export default function NewPodcastPage() {
           )}
         </div>
 
-        <Field label="Hosts">
-          <input
-            value={hostNames}
-            onChange={(e) => setHostNames(e.target.value)}
-            placeholder="e.g. Jane Doe, Sam Lee"
-            className="input"
-          />
-        </Field>
         <Field label="Description">
           <textarea
             value={description}
@@ -219,16 +209,22 @@ export default function NewPodcastPage() {
         <Field label="Cover image URL">
           <input value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)} className="input" />
         </Field>
-        <Field label="RSS feed URL">
-          <input value={rssUrl} onChange={(e) => setRssUrl(e.target.value)} className="input" />
-        </Field>
         <Field label="Website">
           <input value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} className="input" />
         </Field>
 
+        <Field label="Listened on">
+          <input
+            type="date"
+            value={listenedAt}
+            onChange={(e) => setListenedAt(e.target.value)}
+            className="input"
+          />
+        </Field>
+
         <div className="flex items-center justify-between gap-4 rounded border border-line p-4">
           <span className="text-sm text-slate">Your rating *</span>
-          <RatingWaveform rating={rating} onChange={setRating} size="lg" label />
+          <RatingStars rating={rating} onChange={setRating} size="lg" label />
         </div>
 
         {error && <p className="text-sm text-rust">{error}</p>}

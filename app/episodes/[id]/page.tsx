@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import RatingWaveform from '@/components/RatingWaveform';
+import RatingStars from '@/components/RatingStars';
 import ReviewForm from '@/components/ReviewForm';
 import ReviewCard from '@/components/ReviewCard';
 
@@ -72,7 +72,7 @@ export default async function EpisodePage({ params }: { params: { id: string } }
             </p>
           )}
         </div>
-        <RatingWaveform rating={stats?.average_rating ? Math.round(stats.average_rating) : null} size="md" />
+        <RatingStars rating={stats?.average_rating ? Math.round(stats.average_rating) : null} size="md" />
       </div>
 
       {episode.description && <p className="mt-4 max-w-2xl text-cream/85">{episode.description}</p>}

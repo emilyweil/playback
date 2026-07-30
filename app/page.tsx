@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import ReviewCard from '@/components/ReviewCard';
-import RatingWaveform from '@/components/RatingWaveform';
+import RatingStars from '@/components/RatingStars';
 
 const REVIEW_SELECT = `
   id, rating, body, contains_spoilers, is_relisten, listened_at, created_at, episode_id,
@@ -126,7 +126,7 @@ function RecentlyReviewed({ items }: { items: any[] }) {
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h3 className="truncate font-display text-sm font-medium text-cream">{r.podcasts?.title}</h3>
-                <RatingWaveform rating={r.rating} size="sm" />
+                <RatingStars rating={r.rating} size="sm" />
               </div>
               <p className="mt-1 line-clamp-2 text-sm text-cream/80">{r.body}</p>
               <p className="mt-1 text-xs text-slate">— {r.profiles?.display_name || r.profiles?.username}</p>

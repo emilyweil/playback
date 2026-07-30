@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import RatingWaveform from '@/components/RatingWaveform';
+import RatingStars from '@/components/RatingStars';
 
 type Props = {
   slug: string;
@@ -29,7 +29,7 @@ export default function PodcastCard({ slug, title, coverUrl, hostNames, averageR
         </h3>
         {hostNames && <p className="truncate text-xs text-slate">{hostNames}</p>}
         <div className="mt-1.5 flex items-center gap-2">
-          <RatingWaveform rating={averageRating ? Math.round(averageRating) : null} size="sm" />
+          <RatingStars rating={averageRating ? Math.round(averageRating) : null} size="sm" />
           {typeof ratingCount === 'number' && ratingCount > 0 && (
             <span className="font-mono text-[11px] text-slate">{ratingCount}</span>
           )}

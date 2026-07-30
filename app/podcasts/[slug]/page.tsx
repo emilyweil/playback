@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import RatingWaveform from '@/components/RatingWaveform';
+import RatingStars from '@/components/RatingStars';
 import ReviewForm from '@/components/ReviewForm';
 import ReviewCard from '@/components/ReviewCard';
 import StatusSelector from '@/components/StatusSelector';
@@ -68,14 +68,25 @@ export default async function PodcastPage({ params }: { params: { slug: string }
     .limit(20);
 
   let myStatus = null;
+  let alreadyReviewed = false;
   if (user) {
-    const { data } = await supabase
-      .from('podcast_statuses')
-      .select('status')
-      .eq('user_id', user.id)
-      .eq('podcast_id', podcast.id)
-      .maybeSingle();
-    myStatus = data?.status ?? null;
+    const [{ data: statusRow }, { data: myReview }] = await Promise.all([
+      supabase
+        .from('podcast_statuses')
+        .select('status')
+        .eq('user_id', user.id)
+        .eq('podcast_id', podcast.id)
+        .maybeSingle(),
+      supabase
+        .from('reviews')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('podcast_id', podcast.id)
+        .limit(1)
+        .maybeSingle(),
+    ]);
+    myStatus = statusRow?.status ?? null;
+    alreadyReviewed = Boolean(myReview);
   }
 
   return (
@@ -97,7 +108,7 @@ export default async function PodcastPage({ params }: { params: { slug: string }
           {podcast.host_names && <p className="mt-1 text-slate">{podcast.host_names}</p>}
 
           <div className="mt-3 flex items-center gap-3">
-            <RatingWaveform rating={stats?.average_rating ? Math.round(stats.average_rating) : null} size="md" />
+            <RatingStars rating={stats?.average_rating ? Math.round(stats.average_rating) : null} size="md" />
             <span className="font-mono text-xs text-slate">
               {stats?.average_rating ? stats.average_rating.toFixed(2) : '—'} avg · {stats?.rating_count ?? 0} ratings
               · {stats?.log_count ?? 0} logs
@@ -151,7 +162,7 @@ export default async function PodcastPage({ params }: { params: { slug: string }
                   </span>
                   <span className="ml-2 text-cream hover:text-amber">{ep.title}</span>
                 </Link>
-                <RatingWaveform
+                <RatingStars
                   rating={episodeStatsById[ep.id]?.average_rating ? Math.round(episodeStatsById[ep.id].average_rating!) : null}
                   size="sm"
                 />
@@ -161,12 +172,14 @@ export default async function PodcastPage({ params }: { params: { slug: string }
         )}
       </section>
 
-      <section className="mt-10">
-        <h2 className="font-display text-sm font-semibold uppercase tracking-wide2 text-slate">Log or review</h2>
-        <div className="mt-4">
-          <ReviewForm targetType="podcast" targetId={podcast.id} userId={user?.id ?? null} />
-        </div>
-      </section>
+      {!alreadyReviewed && (
+        <section className="mt-10">
+          <h2 className="font-display text-sm font-semibold uppercase tracking-wide2 text-slate">Log or review</h2>
+          <div className="mt-4">
+            <ReviewForm targetType="podcast" targetId={podcast.id} userId={user?.id ?? null} />
+          </div>
+        </section>
+      )}
 
       <section className="mt-10">
         <h2 className="font-display text-sm font-semibold uppercase tracking-wide2 text-slate">Reviews</h2>

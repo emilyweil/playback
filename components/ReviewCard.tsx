@@ -1,12 +1,10 @@
 import Link from 'next/link';
-import RatingWaveform from '@/components/RatingWaveform';
+import RatingStars from '@/components/RatingStars';
 
 type ReviewRow = {
   id: string;
   rating: number | null;
   body: string | null;
-  contains_spoilers: boolean;
-  is_relisten: boolean;
   listened_at: string;
   created_at: string;
   episode_id: string | null;
@@ -66,23 +64,13 @@ export default function ReviewCard({ review, showAuthor = true }: { review: Revi
                 </Link>
               </>
             )}
-            {review.is_relisten && <span className="ml-2 text-xs text-signal">re-listen</span>}
           </div>
         </div>
-        {review.rating && <RatingWaveform rating={review.rating} size="sm" />}
+        {review.rating && <RatingStars rating={review.rating} size="sm" />}
       </div>
 
       {review.body && (
-        <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-cream/90">
-          {review.contains_spoilers ? (
-            <details>
-              <summary className="cursor-pointer text-sm text-rust">Contains spoilers — click to reveal</summary>
-              <span className="mt-2 block">{review.body}</span>
-            </details>
-          ) : (
-            review.body
-          )}
-        </p>
+        <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-cream/90">{review.body}</p>
       )}
 
       <time className="mt-2 block font-mono text-[11px] text-slate">

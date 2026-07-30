@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import RatingWaveform from '@/components/RatingWaveform';
+import RatingStars from '@/components/RatingStars';
 
 type Props = {
   targetType: 'podcast' | 'episode';
@@ -18,8 +18,6 @@ export default function ReviewForm({ targetType, targetId, userId }: Props) {
   const [rating, setRating] = useState<number | null>(null);
   const [body, setBody] = useState('');
   const [listenedAt, setListenedAt] = useState(() => new Date().toISOString().slice(0, 10));
-  const [spoilers, setSpoilers] = useState(false);
-  const [relisten, setRelisten] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -47,8 +45,6 @@ export default function ReviewForm({ targetType, targetId, userId }: Props) {
       rating,
       body: body.trim() || null,
       listened_at: listenedAt,
-      contains_spoilers: spoilers,
-      is_relisten: relisten,
     });
 
     setLoading(false);
@@ -67,7 +63,7 @@ export default function ReviewForm({ targetType, targetId, userId }: Props) {
     <form onSubmit={handleSubmit} className="rounded border border-line p-4">
       <div className="flex items-center justify-between gap-4">
         <span className="text-sm text-slate">Your rating</span>
-        <RatingWaveform rating={rating} onChange={setRating} size="lg" label />
+        <RatingStars rating={rating} onChange={setRating} size="lg" label />
       </div>
 
       <textarea
@@ -87,14 +83,6 @@ export default function ReviewForm({ targetType, targetId, userId }: Props) {
             onChange={(e) => setListenedAt(e.target.value)}
             className="input py-1"
           />
-        </label>
-        <label className="flex items-center gap-2">
-          <input type="checkbox" checked={relisten} onChange={(e) => setRelisten(e.target.checked)} />
-          Re-listen
-        </label>
-        <label className="flex items-center gap-2">
-          <input type="checkbox" checked={spoilers} onChange={(e) => setSpoilers(e.target.checked)} />
-          Contains spoilers
         </label>
       </div>
 
