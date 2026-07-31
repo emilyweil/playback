@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import PodcastCard from '@/components/PodcastCard';
+import PodcastTile from '@/components/PodcastTile';
 
 async function getStatsById(supabase: ReturnType<typeof createClient>, podcastIds: string[]) {
   const statsById: Record<string, { average_rating: number | null; rating_count: number }> = {};
@@ -44,25 +44,20 @@ export default async function FriendAddedPodcasts({ followingIds }: { followingI
 
   return (
     <section className="mt-8">
-      <h2 className="font-display text-sm font-semibold uppercase tracking-wide2 text-slate">
-        Recently added by friends
-      </h2>
       {addedPodcasts.length === 0 ? (
         <p className="mt-3 text-sm text-slate">No one you follow has added a podcast yet.</p>
       ) : (
-        <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="mt-4 flex gap-5 overflow-x-auto pb-2">
           {addedPodcasts.map((p: any) => (
-            <div key={p.id}>
-              <PodcastCard
-                slug={p.slug}
-                title={p.title}
-                coverUrl={p.cover_url}
-                hostNames={p.host_names}
-                averageRating={statsById[p.id]?.average_rating}
-                ratingCount={statsById[p.id]?.rating_count}
-              />
-              <p className="mt-1 text-xs text-slate">added by {p.profiles?.display_name || p.profiles?.username}</p>
-            </div>
+            <PodcastTile
+              key={p.id}
+              slug={p.slug}
+              title={p.title}
+              coverUrl={p.cover_url}
+              averageRating={statsById[p.id]?.average_rating}
+              ratingCount={statsById[p.id]?.rating_count}
+              caption={`added by ${p.profiles?.display_name || p.profiles?.username}`}
+            />
           ))}
         </div>
       )}

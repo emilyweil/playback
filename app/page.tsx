@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import ReviewCard from '@/components/ReviewCard';
 import RatingStars from '@/components/RatingStars';
-import PodcastCard from '@/components/PodcastCard';
+import PodcastTile from '@/components/PodcastTile';
 import FriendAddedPodcasts from '@/components/FriendAddedPodcasts';
 
 const REVIEW_SELECT = `
@@ -135,14 +135,13 @@ function BrowseAll({ items, statsById, q }: { items: any[]; statsById: Record<st
       {items.length === 0 ? (
         <p className="mt-6 text-sm text-slate">{q ? `No podcasts matching "${q}".` : 'No podcasts yet.'}</p>
       ) : (
-        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="mt-6 flex gap-5 overflow-x-auto pb-2">
           {items.map((p) => (
-            <PodcastCard
+            <PodcastTile
               key={p.id}
               slug={p.slug}
               title={p.title}
               coverUrl={p.cover_url}
-              hostNames={p.host_names}
               averageRating={statsById[p.id]?.average_rating}
               ratingCount={statsById[p.id]?.rating_count}
             />
@@ -164,14 +163,13 @@ function RecentlyAdded({ items, statsById }: { items: any[]; statsById: Record<s
           + Add a podcast
         </Link>
       </div>
-      <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <div className="mt-4 flex gap-5 overflow-x-auto pb-2">
         {items.map((p) => (
-          <PodcastCard
+          <PodcastTile
             key={p.id}
             slug={p.slug}
             title={p.title}
             coverUrl={p.cover_url}
-            hostNames={p.host_names}
             averageRating={statsById[p.id]?.average_rating}
             ratingCount={statsById[p.id]?.rating_count}
           />
@@ -186,9 +184,7 @@ function RecentlyReviewed({ items }: { items: any[] }) {
 
   return (
     <section className="mt-16">
-      <h2 className="font-display text-sm font-semibold uppercase tracking-wide2 text-slate">
-        Recently reviewed podcasts
-      </h2>
+      <h2 className="font-display text-2xl font-semibold text-cream">Recently reviewed podcasts</h2>
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {items.map((r) => (
           <Link
