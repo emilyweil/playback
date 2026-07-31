@@ -51,6 +51,13 @@ export default function ProfileMenu({ profile }: { profile: Profile }) {
           >
             Friend Feed
           </Link>
+          <Link
+            href="/profile/lists"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2 text-sm text-cream hover:bg-raised"
+          >
+            My lists
+          </Link>
           <div className="my-1 border-t border-line" />
           <Link
             href={`/u/${profile.username}`}

@@ -58,7 +58,7 @@ export default async function PodcastPage({ params }: { params: { slug: string }
     for (const s of epStats ?? []) episodeStatsById[s.episode_id] = s;
   }
 
-  const { data: reviews } = await supabase
+  const { data: reviews, error: reviewsError } = await supabase
     .from('reviews')
     .select(
       'id, rating, body, contains_spoilers, is_relisten, listened_at, created_at, episode_id, profiles(username, display_name), podcasts(title, slug)'
@@ -126,9 +126,6 @@ export default async function PodcastPage({ params }: { params: { slug: string }
                 RSS feed ↗
               </a>
             )}
-            <Link href={`/podcasts/${podcast.slug}/episodes/new`} className="text-slate hover:text-amber">
-              + Add episode
-            </Link>
           </div>
 
           <div className="mt-5 flex items-center justify-between gap-4">
@@ -144,9 +141,7 @@ export default async function PodcastPage({ params }: { params: { slug: string }
       </div>
 
       <section className="mt-10">
-        {!episodes || episodes.length === 0 ? (
-          <p className="mt-3 text-sm text-slate">No episodes logged yet.</p>
-        ) : (
+        {episodes && episodes.length > 0 && (
           <ul className="mt-4 divide-y divide-line rounded border border-line bg-surface px-4">
             {episodes.map((ep: any) => (
               <li key={ep.id} className="flex items-center justify-between gap-4 py-3">
@@ -179,7 +174,11 @@ export default async function PodcastPage({ params }: { params: { slug: string }
       <section className="mt-10">
         <h2 className="font-display text-sm font-semibold uppercase tracking-wide2 text-slate">Reviews</h2>
         {podcast.description && <p className="mt-3 max-w-2xl text-cream/85">{podcast.description}</p>}
-        {!reviews || reviews.length === 0 ? (
+        {reviewsError ? (
+          <p className="mt-3 rounded border border-rust/40 bg-rust/5 p-4 text-sm text-rust">
+            Couldn&rsquo;t load reviews: {reviewsError.message}
+          </p>
+        ) : !reviews || reviews.length === 0 ? (
           <p className="mt-3 text-sm text-slate">No reviews yet.</p>
         ) : (
           <div className="mt-4 rounded border border-line bg-surface px-5">

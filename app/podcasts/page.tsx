@@ -8,6 +8,9 @@ export default async function BrowsePodcasts({
   searchParams: { q?: string };
 }) {
   const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const q = searchParams.q?.trim();
 
   let query = supabase
@@ -57,7 +60,25 @@ export default async function BrowsePodcasts({
         </p>
       ) : !podcasts || podcasts.length === 0 ? (
         <p className="mt-10 text-slate">
-          {q ? `No podcasts matching "${q}".` : 'No podcasts yet — be the first to add one.'}
+          {q ? (
+            `No podcasts matching "${q}".`
+          ) : user ? (
+            <>
+              No podcasts yet —{' '}
+              <Link href="/podcasts/new" className="text-cream hover:text-amber">
+                add one
+              </Link>
+              .
+            </>
+          ) : (
+            <>
+              No podcasts yet —{' '}
+              <Link href="/signup" className="text-cream hover:text-amber">
+                sign up
+              </Link>{' '}
+              to add one.
+            </>
+          )}
         </p>
       ) : (
         <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2">

@@ -46,9 +46,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="min-h-screen bg-paper font-serif text-ink antialiased">
         <Nav profile={profile} />
         <main className="mx-auto max-w-5xl px-5 py-10">{children}</main>
-        <footer className="mx-auto max-w-5xl px-5 py-10 text-xs text-slate">
-          Playback — built with Next.js &amp; Supabase.
-        </footer>
       </body>
     </html>
   );

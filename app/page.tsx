@@ -32,6 +32,17 @@ async function getRecentlyAddedPodcasts(supabase: ReturnType<typeof createClient
   return data ?? [];
 }
 
+async function getStatsById(supabase: ReturnType<typeof createClient>, podcastIds: string[]) {
+  const statsById: Record<string, { average_rating: number | null; rating_count: number }> = {};
+  if (podcastIds.length === 0) return statsById;
+  const { data } = await supabase
+    .from('podcast_stats')
+    .select('podcast_id, average_rating, rating_count')
+    .in('podcast_id', podcastIds);
+  for (const s of data ?? []) statsById[s.podcast_id] = s;
+  return statsById;
+}
+
 export default async function HomePage({ searchParams }: { searchParams: { q?: string } }) {
   const supabase = createClient();
   const {
@@ -85,19 +96,28 @@ export default async function HomePage({ searchParams }: { searchParams: { q?: s
   if (q) browseQuery = browseQuery.ilike('title', `%${q}%`);
   const { data: browsePodcasts } = await browseQuery;
 
+  const recentlyAddedStats = await getStatsById(
+    supabase,
+    recentlyAdded.map((p) => p.id)
+  );
+  const browseStats = await getStatsById(
+    supabase,
+    (browsePodcasts ?? []).map((p) => p.id)
+  );
+
   return (
     <div>
       <h1 className="font-display text-2xl font-semibold text-cream">Friend feed</h1>
       <FriendAddedPodcasts followingIds={followingIds} />
 
-      <RecentlyAdded items={recentlyAdded} />
+      <RecentlyAdded items={recentlyAdded} statsById={recentlyAddedStats} />
       <RecentlyReviewed items={recentlyReviewed} />
-      <BrowseAll items={browsePodcasts ?? []} q={q} />
+      <BrowseAll items={browsePodcasts ?? []} statsById={browseStats} q={q} />
     </div>
   );
 }
 
-function BrowseAll({ items, q }: { items: any[]; q?: string }) {
+function BrowseAll({ items, statsById, q }: { items: any[]; statsById: Record<string, any>; q?: string }) {
   return (
     <section className="mt-16">
       <h2 className="font-display text-2xl font-semibold text-cream">Browse all podcasts</h2>
@@ -117,7 +137,15 @@ function BrowseAll({ items, q }: { items: any[]; q?: string }) {
       ) : (
         <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
           {items.map((p) => (
-            <PodcastCard key={p.id} slug={p.slug} title={p.title} coverUrl={p.cover_url} hostNames={p.host_names} />
+            <PodcastCard
+              key={p.id}
+              slug={p.slug}
+              title={p.title}
+              coverUrl={p.cover_url}
+              hostNames={p.host_names}
+              averageRating={statsById[p.id]?.average_rating}
+              ratingCount={statsById[p.id]?.rating_count}
+            />
           ))}
         </div>
       )}
@@ -125,7 +153,7 @@ function BrowseAll({ items, q }: { items: any[]; q?: string }) {
   );
 }
 
-function RecentlyAdded({ items }: { items: any[] }) {
+function RecentlyAdded({ items, statsById }: { items: any[]; statsById: Record<string, any> }) {
   if (!items || items.length === 0) return null;
 
   return (
@@ -144,6 +172,8 @@ function RecentlyAdded({ items }: { items: any[] }) {
             title={p.title}
             coverUrl={p.cover_url}
             hostNames={p.host_names}
+            averageRating={statsById[p.id]?.average_rating}
+            ratingCount={statsById[p.id]?.rating_count}
           />
         ))}
       </div>
