@@ -31,7 +31,7 @@ export default function ReviewCard({ review, showAuthor = true }: { review: Revi
       : { label: 'Unknown', href: '#' };
 
   return (
-    <article className="border-b border-line py-5 first:pt-0 last:border-b-0">
+    <article className="border-b border-line py-5 last:border-b-0">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           {showAuthor && review.profiles && (

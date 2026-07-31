@@ -35,6 +35,7 @@ export default function ReviewForm({ targetType, targetId, userId }: Props) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (rating === null) return;
     setLoading(true);
     setError(null);
 
@@ -47,13 +48,24 @@ export default function ReviewForm({ targetType, targetId, userId }: Props) {
       listened_at: listenedAt,
     });
 
-    setLoading(false);
-
     if (error) {
+      setLoading(false);
       setError(error.message);
       return;
     }
 
+    // Reviewing a podcast means you've actually listened to it, so it no
+    // longer belongs on a "want to listen" or "currently listening" shelf.
+    if (targetType === 'podcast') {
+      await supabase
+        .from('podcast_statuses')
+        .delete()
+        .eq('user_id', userId)
+        .eq('podcast_id', targetId)
+        .in('status', ['want_to_listen', 'listening']);
+    }
+
+    setLoading(false);
     setDone(true);
     setBody('');
     router.refresh();
@@ -62,7 +74,7 @@ export default function ReviewForm({ targetType, targetId, userId }: Props) {
   return (
     <form onSubmit={handleSubmit} className="rounded border border-line p-4">
       <div className="flex items-center justify-between gap-4">
-        <span className="text-sm text-slate">Your rating</span>
+        <span className="text-sm text-slate">Your rating *</span>
         <RatingStars rating={rating} onChange={setRating} size="lg" label />
       </div>
 
@@ -89,7 +101,7 @@ export default function ReviewForm({ targetType, targetId, userId }: Props) {
       {error && <p className="mt-3 text-sm text-rust">{error}</p>}
       {done && <p className="mt-3 text-sm text-signal">Logged.</p>}
 
-      <button type="submit" disabled={loading} className="btn-primary mt-4">
+      <button type="submit" disabled={loading || rating === null} className="btn-primary mt-4">
         {loading ? 'Saving…' : 'Save log'}
       </button>
     </form>
