@@ -61,7 +61,7 @@ export default async function PodcastPage({ params }: { params: { slug: string }
   const { data: reviews, error: reviewsError } = await supabase
     .from('reviews')
     .select(
-      'id, rating, body, contains_spoilers, is_relisten, listened_at, created_at, episode_id, profiles(username, display_name), podcasts(title, slug)'
+      'id, rating, body, contains_spoilers, is_relisten, listened_at, created_at, episode_id, profiles!reviews_user_id_fkey(username, display_name), podcasts(title, slug)'
     )
     .eq('podcast_id', podcast.id)
     .order('created_at', { ascending: false })
@@ -69,6 +69,9 @@ export default async function PodcastPage({ params }: { params: { slug: string }
 
   let myStatus = null;
   let alreadyReviewed = false;
+  const isOwner = Boolean(user && podcast.added_by === user.id);
+  let othersHaveReviewed = false;
+
   if (user) {
     const [{ data: statusRow }, { data: myReview }] = await Promise.all([
       supabase
@@ -87,6 +90,17 @@ export default async function PodcastPage({ params }: { params: { slug: string }
     ]);
     myStatus = statusRow?.status ?? null;
     alreadyReviewed = Boolean(myReview);
+
+    if (isOwner) {
+      const { data: otherReview } = await supabase
+        .from('reviews')
+        .select('id')
+        .eq('podcast_id', podcast.id)
+        .neq('user_id', user.id)
+        .limit(1)
+        .maybeSingle();
+      othersHaveReviewed = Boolean(otherReview);
+    }
   }
 
   return (
@@ -129,13 +143,21 @@ export default async function PodcastPage({ params }: { params: { slug: string }
           </div>
 
           <div className="mt-5 flex items-center justify-between gap-4">
-            <StatusSelector podcastId={podcast.id} userId={user?.id ?? null} initialStatus={myStatus} />
-            <DeletePodcastButton
-              podcastId={podcast.id}
-              podcastTitle={podcast.title}
-              userId={user?.id ?? null}
-              addedBy={podcast.added_by}
-            />
+            {!isOwner && <StatusSelector podcastId={podcast.id} userId={user?.id ?? null} initialStatus={myStatus} />}
+            {isOwner &&
+              (othersHaveReviewed ? (
+                <p className="text-xs text-slate">
+                  Others have reviewed this podcast, so it can&rsquo;t be deleted from the system. You can still
+                  remove it from your own diary from your profile page.
+                </p>
+              ) : (
+                <DeletePodcastButton
+                  podcastId={podcast.id}
+                  podcastTitle={podcast.title}
+                  userId={user?.id ?? null}
+                  addedBy={podcast.added_by}
+                />
+              ))}
           </div>
         </div>
       </div>

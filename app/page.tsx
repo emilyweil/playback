@@ -7,7 +7,7 @@ import FriendAddedPodcasts from '@/components/FriendAddedPodcasts';
 
 const REVIEW_SELECT = `
   id, rating, body, contains_spoilers, is_relisten, listened_at, created_at, episode_id,
-  profiles ( username, display_name ),
+  profiles!reviews_user_id_fkey ( username, display_name ),
   podcasts ( title, slug ),
   episodes ( title, episode_number, season_number, podcasts ( title, slug ) )
 `;
@@ -15,7 +15,7 @@ const REVIEW_SELECT = `
 async function getRecentlyReviewedPodcasts(supabase: ReturnType<typeof createClient>) {
   const { data } = await supabase
     .from('reviews')
-    .select('id, rating, body, created_at, profiles(username, display_name), podcasts(title, slug, cover_url)')
+    .select('id, rating, body, created_at, profiles!reviews_user_id_fkey(username, display_name), podcasts(title, slug, cover_url)')
     .not('podcast_id', 'is', null)
     .not('body', 'is', null)
     .order('created_at', { ascending: false })
