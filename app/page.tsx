@@ -18,6 +18,7 @@ async function getRecentlyReviewedPodcasts(supabase: ReturnType<typeof createCli
     .select('id, rating, body, created_at, profiles!reviews_user_id_fkey(username, display_name), podcasts(title, slug, cover_url)')
     .not('podcast_id', 'is', null)
     .not('body', 'is', null)
+    .not('rating', 'is', null)
     .order('created_at', { ascending: false })
     .limit(6);
   return data ?? [];
