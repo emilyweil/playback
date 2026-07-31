@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import FollowButton from '@/components/FollowButton';
 import BlockButton from '@/components/BlockButton';
+import Avatar from '@/components/Avatar';
 
 export default async function FriendsPage() {
   const supabase = createClient();
@@ -23,15 +24,15 @@ export default async function FriendsPage() {
   const [{ data: followingRows }, { data: followerRows }, { data: blockedRows }] = await Promise.all([
     supabase
       .from('follows')
-      .select('following_id, profiles!follows_following_id_fkey(id, username, display_name)')
+      .select('following_id, profiles!follows_following_id_fkey(id, username, display_name, avatar_url)')
       .eq('follower_id', user.id),
     supabase
       .from('follows')
-      .select('follower_id, profiles!follows_follower_id_fkey(id, username, display_name)')
+      .select('follower_id, profiles!follows_follower_id_fkey(id, username, display_name, avatar_url)')
       .eq('following_id', user.id),
     supabase
       .from('blocks')
-      .select('blocked_id, profiles!blocks_blocked_id_fkey(id, username, display_name)')
+      .select('blocked_id, profiles!blocks_blocked_id_fkey(id, username, display_name, avatar_url)')
       .eq('blocker_id', user.id),
   ]);
 
@@ -69,8 +70,11 @@ export default async function FriendsPage() {
           <ul className="mt-4 divide-y divide-line rounded border border-line bg-surface px-5">
             {following.map((p: any) => (
               <li key={p.id} className="flex items-center justify-between gap-4 py-3">
-                <Link href={`/u/${p.username}`} className="text-sm text-cream hover:text-amber">
-                  {p.display_name || p.username}
+                <Link href={`/u/${p.username}`} className="flex min-w-0 items-center gap-3">
+                  <Avatar avatarUrl={p.avatar_url} name={p.display_name || p.username} />
+                  <span className="truncate text-sm text-cream hover:text-amber">
+                    {p.display_name || p.username}
+                  </span>
                 </Link>
                 <FollowButton viewerId={user.id} targetId={p.id} initiallyFollowing={true} followingLabel="Unfollow" />
               </li>
@@ -89,8 +93,11 @@ export default async function FriendsPage() {
           <ul className="mt-4 divide-y divide-line rounded border border-line bg-surface px-5">
             {followers.map((p: any) => (
               <li key={p.id} className="flex items-center justify-between gap-4 py-3">
-                <Link href={`/u/${p.username}`} className="text-sm text-cream hover:text-amber">
-                  {p.display_name || p.username}
+                <Link href={`/u/${p.username}`} className="flex min-w-0 items-center gap-3">
+                  <Avatar avatarUrl={p.avatar_url} name={p.display_name || p.username} />
+                  <span className="truncate text-sm text-cream hover:text-amber">
+                    {p.display_name || p.username}
+                  </span>
                 </Link>
                 <BlockButton viewerId={user.id} targetId={p.id} initiallyBlocked={blockedIds.has(p.id)} />
               </li>
