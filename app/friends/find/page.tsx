@@ -33,16 +33,17 @@ export default async function FindFriendsPage({ searchParams }: { searchParams: 
   }
 
   const followingSet = new Set<string>();
+  const blockedSet = new Set<string>();
   if (results.length > 0) {
-    const { data: followRows } = await supabase
-      .from('follows')
-      .select('following_id')
-      .eq('follower_id', user.id)
-      .in(
-        'following_id',
-        results.map((r) => r.id)
-      );
+    const resultIds = results.map((r) => r.id);
+    const [{ data: followRows }, { data: blocksAsBlocker }, { data: blocksAsBlocked }] = await Promise.all([
+      supabase.from('follows').select('following_id').eq('follower_id', user.id).in('following_id', resultIds),
+      supabase.from('blocks').select('blocked_id').eq('blocker_id', user.id).in('blocked_id', resultIds),
+      supabase.from('blocks').select('blocker_id').eq('blocked_id', user.id).in('blocker_id', resultIds),
+    ]);
     for (const f of followRows ?? []) followingSet.add(f.following_id);
+    for (const b of blocksAsBlocker ?? []) blockedSet.add(b.blocked_id);
+    for (const b of blocksAsBlocked ?? []) blockedSet.add(b.blocker_id);
   }
 
   return (
@@ -74,7 +75,9 @@ export default async function FindFriendsPage({ searchParams }: { searchParams: 
                     </p>
                     <p className="text-xs text-slate">@{r.username}</p>
                   </Link>
-                  <FollowButton viewerId={user.id} targetId={r.id} initiallyFollowing={followingSet.has(r.id)} />
+                  {!blockedSet.has(r.id) && (
+                    <FollowButton viewerId={user.id} targetId={r.id} initiallyFollowing={followingSet.has(r.id)} />
+                  )}
                 </li>
               ))}
             </ul>

@@ -397,8 +397,8 @@ create policy "users can unfollow as themselves" on public.follows
   for delete using (auth.uid() = follower_id);
 
 -- blocks: only the blocker can see, create, or remove their own blocks
-create policy "users can view their own blocks" on public.blocks
-  for select using (auth.uid() = blocker_id);
+create policy "users can view blocks involving themselves" on public.blocks
+  for select using (auth.uid() = blocker_id or auth.uid() = blocked_id);
 create policy "users can create their own blocks" on public.blocks
   for insert with check (auth.uid() = blocker_id);
 create policy "users can remove their own blocks" on public.blocks

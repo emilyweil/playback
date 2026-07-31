@@ -34,14 +34,25 @@ export default async function ProfilePage({ params }: { params: { username: stri
   const isOwner = user?.id === profile.id;
 
   let alreadyFollowing = false;
+  let isBlocked = false;
   if (user && user.id !== profile.id) {
-    const { data } = await supabase
-      .from('follows')
-      .select('follower_id')
-      .eq('follower_id', user.id)
-      .eq('following_id', profile.id)
-      .maybeSingle();
-    alreadyFollowing = Boolean(data);
+    const [{ data: followRow }, { data: blockRow }] = await Promise.all([
+      supabase
+        .from('follows')
+        .select('follower_id')
+        .eq('follower_id', user.id)
+        .eq('following_id', profile.id)
+        .maybeSingle(),
+      supabase
+        .from('blocks')
+        .select('blocker_id')
+        .or(
+          `and(blocker_id.eq.${user.id},blocked_id.eq.${profile.id}),and(blocker_id.eq.${profile.id},blocked_id.eq.${user.id})`
+        )
+        .maybeSingle(),
+    ]);
+    alreadyFollowing = Boolean(followRow);
+    isBlocked = Boolean(blockRow);
   }
 
   return (
@@ -76,7 +87,9 @@ export default async function ProfilePage({ params }: { params: { username: stri
             </div>
           </div>
         </div>
-        <FollowButton viewerId={user?.id ?? null} targetId={profile.id} initiallyFollowing={alreadyFollowing} />
+        {!isBlocked && (
+          <FollowButton viewerId={user?.id ?? null} targetId={profile.id} initiallyFollowing={alreadyFollowing} />
+        )}
       </div>
 
       <section className="mt-10">

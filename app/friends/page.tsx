@@ -20,7 +20,7 @@ export default async function FriendsPage() {
     );
   }
 
-  const [{ data: followingRows }, { data: followerRows }] = await Promise.all([
+  const [{ data: followingRows }, { data: followerRows }, { data: blockedRows }] = await Promise.all([
     supabase
       .from('follows')
       .select('following_id, profiles!follows_following_id_fkey(id, username, display_name)')
@@ -29,10 +29,25 @@ export default async function FriendsPage() {
       .from('follows')
       .select('follower_id, profiles!follows_follower_id_fkey(id, username, display_name)')
       .eq('following_id', user.id),
+    supabase
+      .from('blocks')
+      .select('blocked_id, profiles!blocks_blocked_id_fkey(id, username, display_name)')
+      .eq('blocker_id', user.id),
   ]);
 
   const following = (followingRows ?? []).map((f: any) => f.profiles).filter(Boolean);
-  const followers = (followerRows ?? []).map((f: any) => f.profiles).filter(Boolean);
+
+  // Followers = anyone currently following you, plus anyone you've blocked
+  // (blocking removes the follow relationship, but they should stay visible
+  // here with an Unblock option rather than just vanishing).
+  const activeFollowers = (followerRows ?? []).map((f: any) => f.profiles).filter(Boolean);
+  const blockedProfiles = (blockedRows ?? []).map((b: any) => b.profiles).filter(Boolean);
+  const blockedIds = new Set(blockedProfiles.map((p: any) => p.id));
+
+  const followerMap = new Map<string, any>();
+  for (const p of activeFollowers) followerMap.set(p.id, p);
+  for (const p of blockedProfiles) followerMap.set(p.id, p);
+  const followers = Array.from(followerMap.values());
 
   return (
     <div>
@@ -77,7 +92,7 @@ export default async function FriendsPage() {
                 <Link href={`/u/${p.username}`} className="text-sm text-cream hover:text-amber">
                   {p.display_name || p.username}
                 </Link>
-                <BlockButton viewerId={user.id} targetId={p.id} />
+                <BlockButton viewerId={user.id} targetId={p.id} initiallyBlocked={blockedIds.has(p.id)} />
               </li>
             ))}
           </ul>
