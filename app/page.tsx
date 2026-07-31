@@ -1,16 +1,8 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import ReviewCard from '@/components/ReviewCard';
 import RatingStars from '@/components/RatingStars';
 import PodcastTile from '@/components/PodcastTile';
 import FriendAddedPodcasts from '@/components/FriendAddedPodcasts';
-
-const REVIEW_SELECT = `
-  id, rating, body, contains_spoilers, is_relisten, listened_at, created_at, episode_id,
-  profiles!reviews_user_id_fkey ( username, display_name ),
-  podcasts ( title, slug ),
-  episodes ( title, episode_number, season_number, podcasts ( title, slug ) )
-`;
 
 async function getRecentlyReviewedPodcasts(supabase: ReturnType<typeof createClient>) {
   const { data } = await supabase
@@ -50,41 +42,6 @@ export default async function HomePage({ searchParams }: { searchParams: { q?: s
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    const { data: recentReviews } = await supabase
-      .from('reviews')
-      .select(REVIEW_SELECT)
-      .order('created_at', { ascending: false })
-      .limit(8);
-    const recentlyReviewed = await getRecentlyReviewedPodcasts(supabase);
-
-    return (
-      <div>
-        <Hero />
-        <RecentlyReviewed items={recentlyReviewed} />
-        {recentReviews && recentReviews.length > 0 && (
-          <section className="mt-16">
-            <h2 className="font-display text-sm font-semibold uppercase tracking-wide2 text-slate">
-              Recently logged
-            </h2>
-            <div className="mt-4 rounded border border-line bg-surface px-5">
-              {recentReviews.map((r: any) => (
-                <ReviewCard key={r.id} review={r} />
-              ))}
-            </div>
-          </section>
-        )}
-      </div>
-    );
-  }
-
-  // Signed in
-  const { data: followingRows } = await supabase
-    .from('follows')
-    .select('following_id')
-    .eq('follower_id', user.id);
-  const followingIds = (followingRows ?? []).map((f) => f.following_id);
-
   const recentlyReviewed = await getRecentlyReviewedPodcasts(supabase);
   const recentlyAdded = await getRecentlyAddedPodcasts(supabase);
 
@@ -105,6 +62,24 @@ export default async function HomePage({ searchParams }: { searchParams: { q?: s
     supabase,
     (browsePodcasts ?? []).map((p) => p.id)
   );
+
+  if (!user) {
+    return (
+      <div>
+        <Hero />
+        <RecentlyAdded items={recentlyAdded} statsById={recentlyAddedStats} />
+        <RecentlyReviewed items={recentlyReviewed} />
+        <BrowseAll items={browsePodcasts ?? []} statsById={browseStats} q={q} />
+      </div>
+    );
+  }
+
+  // Signed in
+  const { data: followingRows } = await supabase
+    .from('follows')
+    .select('following_id')
+    .eq('follower_id', user.id);
+  const followingIds = (followingRows ?? []).map((f) => f.following_id);
 
   return (
     <div>

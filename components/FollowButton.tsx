@@ -19,28 +19,50 @@ export default function FollowButton({
   const supabase = createClient();
   const [following, setFollowing] = useState(initiallyFollowing);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!viewerId || viewerId === targetId) return null;
 
   async function toggle() {
     setLoading(true);
+    setError(null);
+
     if (following) {
-      await supabase.from('follows').delete().eq('follower_id', viewerId).eq('following_id', targetId);
+      const { error } = await supabase
+        .from('follows')
+        .delete()
+        .eq('follower_id', viewerId)
+        .eq('following_id', targetId);
+      setLoading(false);
+      if (error) {
+        setError(error.message);
+        return;
+      }
+      setFollowing(false);
     } else {
-      await supabase.from('follows').insert({ follower_id: viewerId, following_id: targetId });
+      const { error } = await supabase.from('follows').insert({ follower_id: viewerId, following_id: targetId });
+      setLoading(false);
+      if (error) {
+        // RLS blocks this insert when either person has blocked the other.
+        setError("You can't follow this person.");
+        return;
+      }
+      setFollowing(true);
     }
-    setFollowing(!following);
-    setLoading(false);
+
     router.refresh();
   }
 
   return (
-    <button
-      onClick={toggle}
-      disabled={loading}
-      className={following ? 'btn-secondary text-sm' : 'btn-primary text-sm'}
-    >
-      {following ? followingLabel : 'Follow'}
-    </button>
+    <div>
+      <button
+        onClick={toggle}
+        disabled={loading}
+        className={following ? 'btn-secondary text-sm' : 'btn-primary text-sm'}
+      >
+        {following ? followingLabel : 'Follow'}
+      </button>
+      {error && <p className="mt-1 text-xs text-rust">{error}</p>}
+    </div>
   );
 }
