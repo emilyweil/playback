@@ -41,7 +41,7 @@ export default async function EpisodePage({ params }: { params: { id: string } }
   const { data: reviews } = await supabase
     .from('reviews')
     .select(
-      'id, rating, body, contains_spoilers, is_relisten, listened_at, created_at, episode_id, profiles!reviews_user_id_fkey(username, display_name)'
+      'id, rating, body, contains_spoilers, is_relisten, listened_at, created_at, episode_id, profiles!reviews_user_id_fkey(username, display_name, avatar_url)'
     )
     .eq('episode_id', episode.id)
     .order('created_at', { ascending: false })

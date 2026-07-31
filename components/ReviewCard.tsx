@@ -8,7 +8,7 @@ type ReviewRow = {
   listened_at: string;
   created_at: string;
   episode_id: string | null;
-  profiles: { username: string; display_name: string | null } | null;
+  profiles: { username: string; display_name: string | null; avatar_url?: string | null } | null;
   podcasts: { title: string; slug: string } | null;
   episodes: {
     title: string;
@@ -33,37 +33,51 @@ export default function ReviewCard({ review, showAuthor = true }: { review: Revi
   return (
     <article className="border-b border-line py-5 last:border-b-0">
       <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
+        <div className="flex min-w-0 gap-3">
           {showAuthor && review.profiles && (
-            <Link
-              href={`/u/${review.profiles.username}`}
-              className="font-display text-sm font-medium text-cream hover:text-amber transition-colors"
-            >
-              {review.profiles.display_name || review.profiles.username}
+            <Link href={`/u/${review.profiles.username}`} className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full bg-raised">
+              {review.profiles.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={review.profiles.avatar_url} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center font-display text-xs text-slate">
+                  {(review.profiles.display_name || review.profiles.username).charAt(0).toUpperCase()}
+                </div>
+              )}
             </Link>
           )}
-          <div className="mt-0.5 truncate text-sm text-slate">
-            {review.episodes ? (
-              <>
-                logged{' '}
-                <Link href={`/podcasts/${review.episodes.podcasts?.slug}`} className="text-cream hover:text-amber">
-                  {review.episodes.podcasts?.title}
-                </Link>
-                {' — '}
-                <span className="font-mono">
-                  {review.episodes.season_number ? `S${review.episodes.season_number} ` : ''}
-                  {review.episodes.episode_number ? `E${review.episodes.episode_number}` : ''}
-                </span>{' '}
-                {review.episodes.title}
-              </>
-            ) : (
-              <>
-                logged{' '}
-                <Link href={target.href} className="text-cream hover:text-amber">
-                  {target.label}
-                </Link>
-              </>
+          <div className="min-w-0">
+            {showAuthor && review.profiles && (
+              <Link
+                href={`/u/${review.profiles.username}`}
+                className="font-display text-sm font-medium text-cream hover:text-amber transition-colors"
+              >
+                {review.profiles.display_name || review.profiles.username}
+              </Link>
             )}
+            <div className="mt-0.5 truncate text-sm text-slate">
+              {review.episodes ? (
+                <>
+                  logged{' '}
+                  <Link href={`/podcasts/${review.episodes.podcasts?.slug}`} className="text-cream hover:text-amber">
+                    {review.episodes.podcasts?.title}
+                  </Link>
+                  {' — '}
+                  <span className="font-mono">
+                    {review.episodes.season_number ? `S${review.episodes.season_number} ` : ''}
+                    {review.episodes.episode_number ? `E${review.episodes.episode_number}` : ''}
+                  </span>{' '}
+                  {review.episodes.title}
+                </>
+              ) : (
+                <>
+                  logged{' '}
+                  <Link href={target.href} className="text-cream hover:text-amber">
+                    {target.label}
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
         {review.rating && <RatingStars rating={review.rating} size="sm" />}
