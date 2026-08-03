@@ -99,7 +99,7 @@ export default async function EpisodePage({ params }: { params: { id: string } }
         {!reviews || reviews.length === 0 ? (
           <p className="mt-3 text-sm text-slate">No reviews yet.</p>
         ) : (
-          <div className="mt-4 rounded border border-line bg-surface px-5">
+          <div className="mt-4 rounded bg-surface px-5">
             {reviews.map((r: any) => (
               <ReviewCard key={r.id} review={{ ...r, podcasts: null, episodes: { title: episode.title, episode_number: episode.episode_number, season_number: episode.season_number, podcasts: podcast } }} />
             ))}

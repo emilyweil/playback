@@ -66,7 +66,7 @@ export default async function FindFriendsPage({ searchParams }: { searchParams: 
           {results.length === 0 ? (
             <p className="text-sm text-slate">No one found matching &ldquo;{q}&rdquo;.</p>
           ) : (
-            <ul className="divide-y divide-line rounded border border-line bg-surface px-5">
+            <ul className="divide-y divide-line rounded bg-surface px-5">
               {results.map((r) => (
                 <li key={r.id} className="flex items-center justify-between gap-4 py-4">
                   <Link href={`/u/${r.username}`} className="min-w-0">

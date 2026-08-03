@@ -67,7 +67,7 @@ export default async function FriendsPage() {
             .
           </p>
         ) : (
-          <ul className="mt-4 divide-y divide-line rounded border border-line bg-surface px-5">
+          <ul className="mt-4 divide-y divide-line rounded bg-surface px-5">
             {following.map((p: any) => (
               <li key={p.id} className="flex items-center justify-between gap-4 py-3">
                 <Link href={`/u/${p.username}`} className="flex min-w-0 items-center gap-3">
@@ -90,7 +90,7 @@ export default async function FriendsPage() {
         {followers.length === 0 ? (
           <p className="mt-3 text-sm text-slate">No one follows you yet.</p>
         ) : (
-          <ul className="mt-4 divide-y divide-line rounded border border-line bg-surface px-5">
+          <ul className="mt-4 divide-y divide-line rounded bg-surface px-5">
             {followers.map((p: any) => (
               <li key={p.id} className="flex items-center justify-between gap-4 py-3">
                 <Link href={`/u/${p.username}`} className="flex min-w-0 items-center gap-3">

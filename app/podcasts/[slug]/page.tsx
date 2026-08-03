@@ -164,7 +164,7 @@ export default async function PodcastPage({ params }: { params: { slug: string }
 
       <section className="mt-10">
         {episodes && episodes.length > 0 && (
-          <ul className="mt-4 divide-y divide-line rounded border border-line bg-surface px-4">
+          <ul className="mt-4 divide-y divide-line rounded bg-surface px-4">
             {episodes.map((ep: any) => (
               <li key={ep.id} className="flex items-center justify-between gap-4 py-3">
                 <Link href={`/episodes/${ep.id}`} className="min-w-0 flex-1">
@@ -203,7 +203,7 @@ export default async function PodcastPage({ params }: { params: { slug: string }
         ) : !reviews || reviews.length === 0 ? (
           <p className="mt-3 text-sm text-slate">No reviews yet.</p>
         ) : (
-          <div className="mt-4 rounded border border-line bg-surface px-5">
+          <div className="mt-4 rounded bg-surface px-5">
             {reviews.map((r: any) => (
               <ReviewCard key={r.id} review={r} />
             ))}

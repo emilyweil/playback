@@ -27,7 +27,7 @@ export default function Nav({ profile }: { profile: Profile | null }) {
               </Link>
               <Link
                 href="/signup"
-                className="rounded bg-amber px-3 py-1.5 font-medium text-ink hover:bg-amber/90 transition-colors"
+                className="rounded bg-amber px-3 py-1.5 font-medium text-white hover:bg-amber/90 transition-colors"
               >
                 Join
               </Link>

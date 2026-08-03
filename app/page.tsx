@@ -166,7 +166,7 @@ function RecentlyReviewed({ items }: { items: any[] }) {
           <Link
             key={r.id}
             href={`/podcasts/${r.podcasts?.slug}`}
-            className="flex gap-3 rounded border border-line bg-surface p-4 transition-colors hover:border-amber"
+            className="flex gap-3 rounded bg-surface p-4 transition-shadow hover:shadow-md"
           >
             <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded bg-raised">
               {r.podcasts?.cover_url ? (
@@ -203,7 +203,7 @@ function Hero() {
   }));
 
   return (
-    <section className="relative overflow-hidden rounded border border-line bg-surface">
+    <section className="relative overflow-hidden">
       <div className="absolute inset-0 flex items-end justify-center gap-[3px] px-6 pb-0 opacity-40">
         {back.map((b, i) => (
           <span
@@ -218,7 +218,7 @@ function Hero() {
         ))}
       </div>
 
-      <div className="relative bg-gradient-to-t from-surface via-surface/85 to-surface/20 px-8 py-20 text-center">
+      <div className="relative bg-gradient-to-t from-paper via-paper/85 to-paper/20 px-8 py-20 text-center">
         <h1 className="mx-auto max-w-xl font-display text-2xl font-semibold leading-tight text-cream sm:text-3xl">
           <span className="whitespace-nowrap">Track podcasts you&rsquo;ve listened to.</span>
           <br />
@@ -227,7 +227,7 @@ function Hero() {
           Tell your friends what&rsquo;s good.
         </h1>
         <div className="mt-8 flex justify-center gap-3">
-          <Link href="/signup" className="rounded bg-amber px-5 py-2.5 font-medium text-ink hover:bg-amber/90">
+          <Link href="/signup" className="rounded bg-amber px-5 py-2.5 font-medium text-white hover:bg-amber/90">
             Get started — it&rsquo;s free!
           </Link>
           <Link
@@ -237,7 +237,7 @@ function Hero() {
             Browse podcasts
           </Link>
         </div>
-        <p className="mt-6 font-mono text-xs uppercase tracking-wide2 text-signal">
+        <p className="mt-6 font-mono text-xs uppercase tracking-wide2 text-ink">
           The social network for podcast lovers.
         </p>
       </div>

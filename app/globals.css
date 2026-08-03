@@ -64,7 +64,7 @@ a {
     @apply rounded border border-line bg-surface px-3 py-2 text-cream placeholder:text-slate/70 focus:border-amber;
   }
   .btn-primary {
-    @apply rounded bg-amber px-4 py-2.5 font-medium text-ink hover:bg-amber/90 disabled:opacity-60;
+    @apply rounded bg-amber px-4 py-2.5 font-medium text-white hover:bg-amber/90 disabled:opacity-60;
   }
   .btn-secondary {
     @apply rounded border border-line px-4 py-2.5 text-cream hover:border-amber transition-colors;
