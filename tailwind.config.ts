@@ -12,7 +12,7 @@ const config: Config = {
         line: '#E4DECA',
         cream: '#2B2A24',
         slate: '#726B57',
-        amber: '#C97F17',
+        amber: '#BC2D47',
         signal: '#3F8F68',
         rust: '#B24B27',
       },
