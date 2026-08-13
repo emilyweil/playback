@@ -15,6 +15,8 @@ function slugify(title: string) {
 }
 
 type Match = { id: string; slug: string; title: string; host_names: string | null };
+type Mode = 'rate' | 'list';
+type ListStatus = 'want_to_listen' | 'listening';
 
 export default function NewPodcastPage() {
   const router = useRouter();
@@ -25,8 +27,12 @@ export default function NewPodcastPage() {
   const [description, setDescription] = useState('');
   const [coverUrl, setCoverUrl] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
+
+  const [mode, setMode] = useState<Mode>('rate');
   const [rating, setRating] = useState<number | null>(null);
   const [listenedAt, setListenedAt] = useState(() => new Date().toISOString().slice(0, 10));
+  const [listStatus, setListStatus] = useState<ListStatus | null>(null);
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -57,16 +63,18 @@ export default function NewPodcastPage() {
     }, 250);
   }
 
+  const canSubmit = mode === 'rate' ? rating !== null : listStatus !== null;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!userId || rating === null) return;
+    if (!userId || !canSubmit) return;
     setLoading(true);
     setError(null);
 
     const slug = slugify(title);
 
     // If this podcast is already in the system, don't try to create a
-    // duplicate — just log your rating against the existing one.
+    // duplicate — just log/list against the existing one.
     const { data: existing } = await supabase
       .from('podcasts')
       .select('id, slug')
@@ -95,8 +103,8 @@ export default function NewPodcastPage() {
 
       if (podcastError) {
         // Race condition: someone else added the same podcast between our
-        // check above and this insert. Recover the same way — log against
-        // theirs rather than surfacing an error.
+        // check above and this insert. Recover the same way — proceed
+        // against theirs rather than surfacing an error.
         if (podcastError.code === '23505') {
           const { data: raceExisting } = await supabase
             .from('podcasts')
@@ -121,24 +129,33 @@ export default function NewPodcastPage() {
       }
     }
 
-    // Rating is required up front, so log it as a review right away — this
-    // is what actually adds the podcast to "podcasts you've listened to,"
-    // whether it was just created or already existed.
-    const { error: reviewError } = await supabase.from('reviews').insert({
-      user_id: userId,
-      podcast_id: podcastId,
-      rating,
-      listened_at: listenedAt,
-    });
-
-    setLoading(false);
-
-    if (reviewError) {
-      // The podcast itself is fine either way — don't block on this, just
-      // let them know they can rate it again from the podcast page.
-      console.error('Failed to save initial rating:', reviewError.message);
+    if (mode === 'rate') {
+      // Rating is what actually adds the podcast to "podcasts you've
+      // listened to," whether it was just created or already existed.
+      const { error: reviewError } = await supabase.from('reviews').insert({
+        user_id: userId,
+        podcast_id: podcastId,
+        rating,
+        listened_at: listenedAt,
+      });
+      if (reviewError) {
+        // The podcast itself is fine either way — don't block on this, just
+        // let them know they can rate it again from the podcast page.
+        console.error('Failed to save initial rating:', reviewError.message);
+      }
+    } else {
+      const { error: statusError } = await supabase
+        .from('podcast_statuses')
+        .upsert(
+          { user_id: userId, podcast_id: podcastId, status: listStatus },
+          { onConflict: 'user_id,podcast_id' }
+        );
+      if (statusError) {
+        console.error('Failed to save list status:', statusError.message);
+      }
     }
 
+    setLoading(false);
     router.push(`/podcasts/${podcastSlug}`);
     router.refresh();
   }
@@ -213,26 +230,78 @@ export default function NewPodcastPage() {
           <input value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} className="input" />
         </Field>
 
-        <Field label="Listened on">
-          <input
-            type="date"
-            value={listenedAt}
-            onChange={(e) => setListenedAt(e.target.value)}
-            className="input"
-          />
-        </Field>
+        <div className="rounded border border-line p-4">
+          <span className="text-sm text-slate">What do you want to do with it?</span>
+          <div className="mt-3 flex gap-2">
+            <ModeButton active={mode === 'rate'} onClick={() => setMode('rate')}>
+              I&rsquo;ve listened — rate it
+            </ModeButton>
+            <ModeButton active={mode === 'list'} onClick={() => setMode('list')}>
+              Add to a list
+            </ModeButton>
+          </div>
 
-        <div className="flex items-center justify-between gap-4 rounded border border-line p-4">
-          <span className="text-sm text-slate">Your rating *</span>
-          <RatingStars rating={rating} onChange={setRating} size="lg" label />
+          {mode === 'rate' ? (
+            <div className="mt-4 flex flex-col gap-4">
+              <label className="flex items-center gap-2 text-sm text-slate">
+                <span>Listened on</span>
+                <input
+                  type="date"
+                  value={listenedAt}
+                  onChange={(e) => setListenedAt(e.target.value)}
+                  className="input py-1"
+                />
+              </label>
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-sm text-slate">Your rating *</span>
+                <RatingStars rating={rating} onChange={setRating} size="lg" label />
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4">
+              <p className="text-xs text-slate">No rating needed — pick a list.</p>
+              <div className="mt-2 flex gap-2">
+                <ModeButton active={listStatus === 'want_to_listen'} onClick={() => setListStatus('want_to_listen')}>
+                  Want to listen
+                </ModeButton>
+                <ModeButton active={listStatus === 'listening'} onClick={() => setListStatus('listening')}>
+                  Listening
+                </ModeButton>
+              </div>
+            </div>
+          )}
         </div>
 
         {error && <p className="text-sm text-rust">{error}</p>}
-        <button type="submit" disabled={loading || !title.trim() || rating === null} className="btn-primary">
+        <button type="submit" disabled={loading || !title.trim() || !canSubmit} className="btn-primary">
           {loading ? 'Adding…' : 'Add podcast'}
         </button>
       </form>
     </div>
+  );
+}
+
+function ModeButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded border px-3 py-1.5 text-sm transition-colors ${
+        active
+          ? 'border-amber bg-amber/10 text-amber'
+          : 'border-line text-slate hover:border-amber/60 hover:text-cream'
+      }`}
+    >
+      {children}
+    </button>
   );
 }
 
