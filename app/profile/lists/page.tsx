@@ -79,13 +79,36 @@ export default async function MyListsPage() {
     .map((r: any) => r.podcasts)
     .filter(Boolean);
 
-  const statsById = await getStatsById(supabase, [...wantToListen, ...listening].map((p: any) => p.id));
+  const { data: reviewRows } = await supabase
+    .from('reviews')
+    .select('created_at, podcasts(id, slug, title, cover_url, host_names)')
+    .eq('user_id', user.id)
+    .not('podcast_id', 'is', null)
+    .not('rating', 'is', null)
+    .order('created_at', { ascending: false });
+
+  // A podcast can have more than one log entry — keep just the most recent.
+  const seen = new Set<string>();
+  const listened: any[] = [];
+  for (const r of reviewRows ?? []) {
+    const p = (r as any).podcasts;
+    if (p && !seen.has(p.id)) {
+      seen.add(p.id);
+      listened.push(p);
+    }
+  }
+
+  const statsById = await getStatsById(
+    supabase,
+    [...listened, ...listening, ...wantToListen].map((p: any) => p.id)
+  );
 
   return (
     <div>
       <h1 className="font-display text-2xl font-semibold text-cream">My lists</h1>
-      <StatusList title="Want to listen" items={wantToListen} statsById={statsById} />
+      <StatusList title="Listened" items={listened} statsById={statsById} />
       <StatusList title="Listening" items={listening} statsById={statsById} />
+      <StatusList title="Want to Listen" items={wantToListen} statsById={statsById} />
     </div>
   );
 }

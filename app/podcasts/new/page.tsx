@@ -15,8 +15,7 @@ function slugify(title: string) {
 }
 
 type Match = { id: string; slug: string; title: string; host_names: string | null };
-type Mode = 'rate' | 'list';
-type ListStatus = 'want_to_listen' | 'listening';
+type Tab = 'listened' | 'listening' | 'want_to_listen';
 
 export default function NewPodcastPage() {
   const router = useRouter();
@@ -28,10 +27,9 @@ export default function NewPodcastPage() {
   const [coverUrl, setCoverUrl] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
 
-  const [mode, setMode] = useState<Mode>('rate');
+  const [tab, setTab] = useState<Tab>('listened');
   const [rating, setRating] = useState<number | null>(null);
   const [listenedAt, setListenedAt] = useState(() => new Date().toISOString().slice(0, 10));
-  const [listStatus, setListStatus] = useState<ListStatus | null>(null);
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -63,7 +61,7 @@ export default function NewPodcastPage() {
     }, 250);
   }
 
-  const canSubmit = mode === 'rate' ? rating !== null : listStatus !== null;
+  const canSubmit = tab === 'listened' ? rating !== null : true;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -129,7 +127,7 @@ export default function NewPodcastPage() {
       }
     }
 
-    if (mode === 'rate') {
+    if (tab === 'listened') {
       // Rating is what actually adds the podcast to "podcasts you've
       // listened to," whether it was just created or already existed.
       const { error: reviewError } = await supabase.from('reviews').insert({
@@ -146,10 +144,7 @@ export default function NewPodcastPage() {
     } else {
       const { error: statusError } = await supabase
         .from('podcast_statuses')
-        .upsert(
-          { user_id: userId, podcast_id: podcastId, status: listStatus },
-          { onConflict: 'user_id,podcast_id' }
-        );
+        .upsert({ user_id: userId, podcast_id: podcastId, status: tab }, { onConflict: 'user_id,podcast_id' });
       if (statusError) {
         console.error('Failed to save list status:', statusError.message);
       }
@@ -231,17 +226,20 @@ export default function NewPodcastPage() {
         </Field>
 
         <div className="rounded border border-line p-4">
-          <span className="text-sm text-slate">What do you want to do with it?</span>
+          <span className="text-sm text-slate">In which list would you like to add it?</span>
           <div className="mt-3 flex gap-2">
-            <ModeButton active={mode === 'rate'} onClick={() => setMode('rate')}>
-              I&rsquo;ve listened — rate it
+            <ModeButton active={tab === 'listened'} onClick={() => setTab('listened')}>
+              Listened
             </ModeButton>
-            <ModeButton active={mode === 'list'} onClick={() => setMode('list')}>
-              Add to a list
+            <ModeButton active={tab === 'listening'} onClick={() => setTab('listening')}>
+              Listening
+            </ModeButton>
+            <ModeButton active={tab === 'want_to_listen'} onClick={() => setTab('want_to_listen')}>
+              Want to Listen
             </ModeButton>
           </div>
 
-          {mode === 'rate' ? (
+          {tab === 'listened' ? (
             <div className="mt-4 flex flex-col gap-4">
               <label className="flex items-center gap-2 text-sm text-slate">
                 <span>Listened on</span>
@@ -258,17 +256,7 @@ export default function NewPodcastPage() {
               </div>
             </div>
           ) : (
-            <div className="mt-4">
-              <p className="text-xs text-slate">No rating needed — pick a list.</p>
-              <div className="mt-2 flex gap-2">
-                <ModeButton active={listStatus === 'want_to_listen'} onClick={() => setListStatus('want_to_listen')}>
-                  Want to listen
-                </ModeButton>
-                <ModeButton active={listStatus === 'listening'} onClick={() => setListStatus('listening')}>
-                  Listening
-                </ModeButton>
-              </div>
-            </div>
+            <p className="mt-4 text-xs text-slate">No rating needed for this list.</p>
           )}
         </div>
 
