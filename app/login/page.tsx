@@ -54,6 +54,9 @@ export default function LoginPage() {
             className="input"
           />
         </Field>
+        <Link href="/forgot-password" className="-mt-2 self-end text-xs text-slate hover:text-amber">
+          Forgot password?
+        </Link>
         {error && <p className="text-sm text-rust">{error}</p>}
         <button type="submit" disabled={loading} className="btn-primary">
           {loading ? 'Signing in…' : 'Sign in'}
