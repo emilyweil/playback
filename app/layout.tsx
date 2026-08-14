@@ -43,7 +43,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" className={`${display.variable} ${serif.variable} ${mono.variable}`}>
-      <body className="min-h-screen bg-paper font-serif text-ink antialiased">
+      <body className="min-h-screen bg-paper font-serif text-ink antialiased" suppressHydrationWarning>
         <Nav profile={profile} />
         <main className="mx-auto max-w-5xl px-5 py-10">{children}</main>
       </body>
