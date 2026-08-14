@@ -49,7 +49,6 @@ export default async function FindFriendsPage({ searchParams }: { searchParams: 
   return (
     <div>
       <h1 className="font-display text-2xl font-semibold text-cream">Find friends</h1>
-      <p className="mt-1 text-sm text-slate">Search by username to follow other listeners.</p>
 
       <form className="mt-6">
         <input

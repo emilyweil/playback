@@ -172,9 +172,6 @@ export default function NewPodcastPage() {
   return (
     <div className="mx-auto max-w-lg">
       <h1 className="font-display text-2xl font-semibold text-cream">Add a podcast</h1>
-      <p className="mt-1 text-sm text-slate">
-        Anyone can add a show. Fill in what you know — you can always add episodes afterward.
-      </p>
 
       <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
         <div className="relative">
